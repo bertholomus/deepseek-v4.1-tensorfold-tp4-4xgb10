@@ -1,0 +1,100 @@
+{
+ "cmd": "concurrent",
+ "base": "http://127.0.0.1:18095",
+ "model": "DeepSeek-V4.1-Flash-TF",
+ "unix": 1791536114.1375337,
+ "result": [
+  {
+   "streams": 2,
+   "rep": 0,
+   "max_tokens": 256,
+   "total_tokens": 512,
+   "wall_s": 4.196090543002356,
+   "aggregate_tps": 122.0183393930431,
+   "per_stream_decode_tps": [
+    98.614,
+    64.797
+   ],
+   "per_stream_tokens": [
+    256,
+    256
+   ],
+   "ttft_s": [
+    0.144,
+    0.261
+   ]
+  },
+  {
+   "streams": 2,
+   "rep": 1,
+   "max_tokens": 256,
+   "total_tokens": 512,
+   "wall_s": 4.221933415014064,
+   "aggregate_tps": 121.27145306916084,
+   "per_stream_decode_tps": [
+    99.448,
+    61.989
+   ],
+   "per_stream_tokens": [
+    256,
+    256
+   ],
+   "ttft_s": [
+    0.212,
+    0.108
+   ]
+  },
+  {
+   "streams": 4,
+   "rep": 0,
+   "max_tokens": 256,
+   "total_tokens": 1024,
+   "wall_s": 6.263800291024381,
+   "aggregate_tps": 163.47903068801946,
+   "per_stream_decode_tps": [
+    61.256,
+    45.505,
+    68.202,
+    52.985
+   ],
+   "per_stream_tokens": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "ttft_s": [
+    0.554,
+    0.659,
+    0.44,
+    0.106
+   ]
+  },
+  {
+   "streams": 4,
+   "rep": 1,
+   "max_tokens": 256,
+   "total_tokens": 1024,
+   "wall_s": 6.035307787999045,
+   "aggregate_tps": 169.66823167431176,
+   "per_stream_decode_tps": [
+    62.026,
+    46.025,
+    67.25,
+    58.095
+   ],
+   "per_stream_tokens": [
+    256,
+    256,
+    256,
+    256
+   ],
+   "ttft_s": [
+    0.387,
+    0.493,
+    0.171,
+    0.284
+   ]
+  }
+ ]
+}

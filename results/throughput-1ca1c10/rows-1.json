@@ -1,0 +1,83 @@
+{
+ "cmd": "decode",
+ "base": "http://127.0.0.1:18095",
+ "model": "DeepSeek-V4.1-Flash-TF",
+ "unix": 1791536065.9034884,
+ "result": [
+  {
+   "set": "a",
+   "prompt": "code",
+   "max_tokens": 512,
+   "reps": 3,
+   "decode_tps_median": 138.06188931530917,
+   "decode_tps_all": [
+    137.444,
+    138.062,
+    138.169
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    145,
+    145,
+    145
+   ],
+   "ttft_s_median": 0.09753152797929943,
+   "identical_texts": true,
+   "sample": "# Thread-Safe LRU Cache with Per-Entry TTL\n\nBelow is a complete implementation of a thread-safe LRU cache with per-entry TTL expiry, followed by a comprehensive `unittest` test suite.\n\n## Implementation\n\n```python\n\"\"\"\nThread-safe LRU cache with per-entry TTL expiry.\n\nThis module provides `TTLLRUCache`, a fixed-capacity cache that:\n  * Evicts the least-recently-used entry when capacity is exceeded."
+  },
+  {
+   "set": "a",
+   "prompt": "prose",
+   "max_tokens": 512,
+   "reps": 3,
+   "decode_tps_median": 87.20123489195791,
+   "decode_tps_all": [
+    85.561,
+    87.201,
+    87.364
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    275,
+    275,
+    275
+   ],
+   "ttft_s_median": 0.10045468399766833,
+   "identical_texts": true,
+   "sample": "# The Lonely Lantern: A History of Lighthouses, Their Light, and the Lives That Kept It Burning\n\nStand on any rocky headland at dusk and you will feel it before you see it: a slow, patient pulse of light swinging out over the water, cutting a white blade through the dark, then vanishing, then returning. That rhythm\u2014on, off, on, off\u2014is one of humanity's oldest promises to itself. It says: *you are "
+  },
+  {
+   "set": "a",
+   "prompt": "structured",
+   "max_tokens": 512,
+   "reps": 3,
+   "decode_tps_median": 165.6026166518455,
+   "decode_tps_all": [
+    165.603,
+    165.636,
+    165.323
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    112,
+    112,
+    112
+   ],
+   "ttft_s_median": 0.16764181302278303,
+   "identical_texts": true,
+   "sample": "[\n  {\n    \"id\": 1,\n    \"name\": \"Ava Thompson\",\n    \"department\": \"Engineering\",\n    \"title\": \"VP of Engineering\",\n    \"salary\": 210000,\n    \"start_date\": \"2016-03-14\",\n    \"manager_id\": null,\n    \"skills\": [\"System Architecture\", \"Team Leadership\", \"Go\", \"Kubernetes\"]\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Marcus Lee\",\n    \"department\": \"Engineering\",\n    \"title\": \"Senior Backend Engineer\",\n    \"salar"
+  }
+ ]
+}

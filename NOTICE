@@ -1,0 +1,29 @@
+DeepSeek-V4.1-Flash TP4 recipe for TensorFold on four NVIDIA GB10 (DGX Spark) nodes
+Copyright 2026 BertholomusAI (Albert Lee, https://github.com/bertholomus)
+
+This recipe (scripts, tools and documents) is licensed under the Apache License, Version 2.0. See LICENSE.
+
+It contains no model weights and no third-party source code. It runs, or was built with reference to, the
+third-party work below. ATTRIBUTION.md says what was taken from each one and how.
+
+TensorFold
+  Copyright 2026 TensorFold contributors. Apache License 2.0.
+  https://github.com/ashhart/TensorFold
+  The serving engine. Our engine for this model is branch deepseek-v41-zig-tp4 of our fork
+  (https://github.com/bertholomus/TensorFold), which keeps TensorFold's LICENSE and upstream license texts, lists the
+  upstream files it changes in its NOTICE and every outside source in its ATTRIBUTION.md.
+
+DeepSeek-V4.1-Flash
+  Copyright (c) 2023 DeepSeek. MIT License (inference code and weights).
+  https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash
+  The model. Its inference code and tech report were read for the model math. No code was copied. The original
+  shards 47 and 48 (Engram tables) and the gates' bias_vl tensors are loaded at run time. Not included here.
+
+DeepSeek-V4.1-Flash-EXL3-2.9bpw
+  EXL3 quantization by Mia-AiLab. MIT License, inherited from the base model.
+  https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw
+  The weights the engine serves. Not included here.
+
+NVIDIA PyTorch container (PyTorch, Triton, NCCL, Pillow)
+  Used at run time as supplied by NVIDIA (nvcr.io/nvidia/pytorch:26.07-py3), under NVIDIA's own license and the
+  components' licenses. Not redistributed here.

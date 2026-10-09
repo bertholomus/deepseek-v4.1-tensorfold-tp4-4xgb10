@@ -1,0 +1,83 @@
+{
+ "cmd": "decode",
+ "base": "http://127.0.0.1:18095",
+ "model": "DeepSeek-V4.1-Flash-TF",
+ "unix": 1791536092.7162654,
+ "result": [
+  {
+   "set": "b",
+   "prompt": "code",
+   "max_tokens": 384,
+   "reps": 3,
+   "decode_tps_median": 158.81838609978095,
+   "decode_tps_all": [
+    158.818,
+    157.676,
+    160.5
+   ],
+   "tokens_all": [
+    384,
+    384,
+    384
+   ],
+   "chunks_all": [
+    89,
+    89,
+    89
+   ],
+   "ttft_s_median": 0.10240481499931775,
+   "identical_texts": true,
+   "sample": "# LRU Cache Implementation\n\nHere's a complete implementation of an LRU Cache using a dictionary and a doubly linked list, achieving O(1) for both `get` and `put` operations.\n\n```python\nclass Node:\n    \"\"\"Doubly linked list node.\"\"\"\n    __slots__ = ('key', 'value', 'prev', 'next')\n\n    def __init__(self, key=None, value=None):\n        self.key = key\n        self.value = value\n        self.prev = No"
+  },
+  {
+   "set": "b",
+   "prompt": "prose",
+   "max_tokens": 384,
+   "reps": 3,
+   "decode_tps_median": 95.46494894190299,
+   "decode_tps_all": [
+    95.037,
+    95.465,
+    95.529
+   ],
+   "tokens_all": [
+    384,
+    384,
+    384
+   ],
+   "chunks_all": [
+    184,
+    184,
+    184
+   ],
+   "ttft_s_median": 0.07082171400543302,
+   "identical_texts": true,
+   "sample": "The invention of the movable-type printing press in the mid-15th century stands as one of the most transformative events in European history. While woodblock printing existed in East Asia centuries earlier, it was Johannes Gutenberg\u2019s innovation around 1440\u2014combining movable metal type, oil-based ink, and a screw press\u2014that mechanized the reproduction of text. This breakthrough fundamentally resha"
+  },
+  {
+   "set": "b",
+   "prompt": "structured",
+   "max_tokens": 384,
+   "reps": 3,
+   "decode_tps_median": 220.24536930498414,
+   "decode_tps_all": [
+    219.655,
+    221.759,
+    220.245
+   ],
+   "tokens_all": [
+    384,
+    384,
+    384
+   ],
+   "chunks_all": [
+    65,
+    65,
+    65
+   ],
+   "ttft_s_median": 0.06963974499376491,
+   "identical_texts": true,
+   "sample": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\n60\n61\n62\n63\n64\n65\n66\n67\n68\n69\n70\n71\n72\n73\n74\n75\n76\n77\n78\n79\n80\n81\n82\n83\n84\n85\n86\n87\n88\n89\n90\n91\n92\n93\n94\n95\n96\n97\n98\n99\n100\n101\n102\n103\n104\n105\n106\n107\n108\n109\n110\n111\n112\n113\n114\n115\n116\n117\n118\n119\n120\n121\n122\n123\n124\n125\n126\n127\n"
+  }
+ ]
+}
