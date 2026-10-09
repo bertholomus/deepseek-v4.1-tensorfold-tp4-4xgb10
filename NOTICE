@@ -3,8 +3,10 @@ Copyright 2026 BertholomusAI (Albert Lee, https://github.com/bertholomus)
 
 This recipe (scripts, tools and documents) is licensed under the Apache License, Version 2.0. See LICENSE.
 
-It contains no model weights and no third-party source code. It runs, or was built with reference to, the
-third-party work below. ATTRIBUTION.md says what was taken from each one and how.
+It contains no model weights and no third-party source code. Its kit/ folder holds compiled kernels: our own, and
+PyTorch's attention kernel for the vision tower, unmodified, in binary form; kit/KIT-LICENSES.md gives each file's
+source and license and kit/LICENSES/ holds the license texts. It runs, or was built with reference to, the third-party
+work below. ATTRIBUTION.md says what was taken from each one and how.
 
 TensorFold
   Copyright 2026 TensorFold contributors. Apache License 2.0.
@@ -17,7 +19,8 @@ DeepSeek-V4.1-Flash
   Copyright (c) 2023 DeepSeek. MIT License (inference code and weights).
   https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash
   The model. Its inference code and tech report were read for the model math. No code was copied. The original
-  shards 47 and 48 (Engram tables) and the gates' bias_vl tensors are loaded at run time. Not included here.
+  shards 47 and 48 (Engram tables) are loaded at run time and not included here. The gates' bias_vl tensors are made
+  into kit/vision/gate_bias_vl.safetensors by kit/tools/make_bias_vl.py; git does not hold that file.
 
 DeepSeek-V4.1-Flash-EXL3-2.9bpw
   EXL3 quantization by Mia-AiLab. MIT License, inherited from the base model.
@@ -26,4 +29,19 @@ DeepSeek-V4.1-Flash-EXL3-2.9bpw
 
 NVIDIA PyTorch container (PyTorch, Triton, NCCL, Pillow)
   Used at run time as supplied by NVIDIA (nvcr.io/nvidia/pytorch:26.07-py3), under NVIDIA's own license and the
-  components' licenses. Not redistributed here.
+  components' licenses. Not redistributed here, except the one PyTorch kernel below.
+
+PyTorch and NVIDIA CUTLASS
+  PyTorch: BSD-3-Clause; its copyright holders are listed in kit/LICENSES/PyTorch-BSD-3-Clause.txt.
+  CUTLASS: Copyright (c) 2017 - 2025 NVIDIA CORPORATION & AFFILIATES. BSD-3-Clause.
+  kit/vision/torch_fmha_sm120.cubin is PyTorch's memory-efficient attention kernel, built on CUTLASS, extracted
+  unmodified from the container's libtorch_cuda.so. License texts: kit/LICENSES/.
+
+Triton
+  Copyright 2018-2020 Philippe Tillet; Copyright 2020-2022 OpenAI. MIT License.
+  Compiled our kernels in kit/aot/. License text: kit/LICENSES/Triton-MIT.txt.
+
+ExLlamaV3
+  Copyright (c) 2025 Turboderp. MIT License.
+  The EXL3 format the kernels in kit/cubins/ read (through TensorFold's EXL3 module). License text:
+  kit/LICENSES/ExLlamaV3-MIT.txt.

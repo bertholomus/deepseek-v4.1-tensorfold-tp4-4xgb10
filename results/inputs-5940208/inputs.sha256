@@ -1,0 +1,8 @@
+# Each node's run-time inputs as node_inputs.sh made them on our four GB10 nodes (engine 5940208, scripts/serve.sh
+# inputs: 109 s for the four at once), from Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw. Each file is byte for byte
+# the one our served lane loads. Columns: sha256, bytes, the file under CACHE_DIR.
+073c040efb55c3bcbe6f8a9e1626aab064f7788437e2eaf62d54b78dd83e1580  56211098348  rank-cache/rank0of4-8d066150c78d6fba6392.bin
+5bcf0ee721cd0e1bca520369cf73a33089cc188642d4f71c2190d7e3d77a7c8e  56211618050  rank-cache/rank1of4-039e14af2ce96ac16ef7.bin
+fc9741ce0477b384853f8f1b8cbe8eb73fa458f69770ff34209e2405aa3b7024  56241541490  rank-cache/rank2of4-502b7baff41cb4172b63.bin
+2aa7840fd8d03c6b2853593ed884d43aea8faff2961a47046ebf3af079b2010b  56241783503  rank-cache/rank3of4-2891eb3d6edaf5929c62.bin
+de40bcdd71f24430ba82752ef385093be962adbf845a1c97db39161597d5dc28       874691  dsv41_token_map.json

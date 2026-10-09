@@ -19,8 +19,8 @@ tags:
 
 Weights: [Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw](https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw)
 (MIT), an EXL3 quant of [deepseek-ai/DeepSeek-V4.1-Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash).
-This repository is a recipe: the served launch, our measurements and the gates the build passed. It holds no weights
-and no engine code.
+This repository is a recipe: the served launch, our measurements, the gates the build passed and, in `kit/`, the
+kernel kit the engine loads. It holds no weights and no engine source.
 
 The engine is branch `deepseek-v41-zig-tp4` of our TensorFold fork,
 [bertholomus/TensorFold](https://github.com/bertholomus/TensorFold/tree/deepseek-v41-zig-tp4). The file
@@ -87,6 +87,14 @@ On the served build (`ad70f4f`):
 On `1ca1c10` (the same model code): the layer gate, all points equal on 4 of 4 nodes over NCCL and over the RDMA
 rings; 48 of 48 image probes (21 formats, message layouts, refusals and their words) equal to the reference lane.
 
+### Run-time inputs from public weights (engine `5940208`, v0.1.1)
+
+| Check | Result |
+|---|---|
+| Each node's weight file and token map from the checkpoint, the four nodes at once (`scripts/serve.sh inputs`) | 109 s; all four weight files (56.2 GB each) and the token map byte for byte the ones our served lane loads |
+| The kit from a fresh clone of this repository (`kit/verify_kit.sh`) | 356 of 356 files match `kit/MANIFEST`; the four RoPE tables made in 11 s on the CPU |
+| The recipe's launch from those inputs and the kit (`scripts/serve.sh start`) | 6 of 6 API gates; 16 of 16 replies equal to the two-node reference; burst and staggered equal solo 16/16; the image gate 6/6, 9/9 and 18/18 |
+
 `results/` holds the raw outputs these tables come from.
 
 ## The served settings
@@ -105,15 +113,19 @@ holds the site settings.
 - The weights: [Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw](https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw),
   and DeepSeek's original shards 47 and 48 for the Engram tables, on every node.
 - The engine built from `ENGINE_COMMIT` (`zig build` with the CUDA toolchain; see `RUNNING.md`).
-- Run-time inputs the engine reads but this release does not build for you (see `RUNNING.md`): each rank's weight
-  cache, the kernel kit (the family's captured Triton kernels and extension cubins, the RoPE tables, the Engram map and,
-  for images, `vision/`), and the compressed token map. Our Python family writes them (the four-rank weight cache with
-  its four-node line, which is not published yet); scripting them is the next release's work.
+- The run-time inputs, made from the public weights (see `RUNNING.md`): each node's weight file and the compressed
+  token map, one command a node (`node_inputs.sh` of the engine branch; `scripts/serve.sh inputs` runs it on all four),
+  and the kernel kit in `kit/`, whose RoPE tables and image bias `kit/verify_kit.sh` makes before it checks every file
+  against `kit/MANIFEST`. The `kit/` folder of
+  [bertholomus/DeepSeek-V4.1-Flash-TensorFold-TP4-4xGB10](https://huggingface.co/bertholomus/DeepSeek-V4.1-Flash-TensorFold-TP4-4xGB10/tree/main/kit) holds the
+  whole kit as a download.
 
 ## License and attribution
 
 This recipe is licensed under Apache-2.0 (`LICENSE`). The engine branch keeps TensorFold's Apache-2.0 license, lists
 the upstream files it changes in its `NOTICE` and every outside source in its `ATTRIBUTION.md`. The weights are MIT
-(DeepSeek; the EXL3 quant by Mia-AiLab inherits it). `ATTRIBUTION.md` here lists what this recipe uses. "DeepSeek"
+(DeepSeek; the EXL3 quant by Mia-AiLab inherits it). `kit/` holds compiled kernels: our own (Apache-2.0) and
+PyTorch's attention kernel for the vision tower, unmodified (BSD-3-Clause); `kit/KIT-LICENSES.md` gives each file's
+source and license. `ATTRIBUTION.md` here lists what this recipe uses. "DeepSeek"
 belongs to DeepSeek and "DGX Spark" and "GB10" to NVIDIA; this recipe is not affiliated with or endorsed by DeepSeek,
 NVIDIA, the TensorFold authors or Mia-AiLab.

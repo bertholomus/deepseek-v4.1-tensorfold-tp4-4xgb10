@@ -1,0 +1,17 @@
+{
+ "burst": {
+  "equal_to_solo": 16,
+  "of": 16,
+  "tokens_per_s": 213.33
+ },
+ "staggered": {
+  "equal_to_solo": 16,
+  "of": 16,
+  "tokens_per_s": 193.21
+ },
+ "solo_tokens_per_s": 107.79,
+ "solo_equal_to_reference": {
+  "equal": 16,
+  "of": 16
+ }
+}

@@ -6,6 +6,8 @@
 #   scripts/serve.sh stop     remove tp4-lane on the four nodes
 #   scripts/serve.sh check    exit 0 when rank 0 lists the model and answers a 4-token chat
 #   scripts/serve.sh print    print what start runs on each node, run nothing
+#   scripts/serve.sh inputs   make each node's weight file and token map in CACHE_DIR (ENGINE_DIR/node_inputs.sh on
+#                             the four nodes at once; RUNNING.md section 2); the launch itself never runs it
 set -u
 here=$(cd "$(dirname "$0")" && pwd)
 CFG=${DSV41_CONFIG:-$here/../config.env}
@@ -32,6 +34,15 @@ stop() {
   local h
   for h in "${N[@]}"; do on "$h" "docker rm -f tp4-lane >/dev/null 2>&1; true"; done
 }
+inputs() {
+  local g rc=0 pids=()
+  for g in 0 1 2 3; do
+    ( set -o pipefail; on "${N[$g]}" "IMAGE=$IMAGE $ENGINE_DIR/node_inputs.sh $MODEL_DIR $CACHE_DIR $g" 2>&1 | sed "s/^/rank $g: /" ) &
+    pids+=($!)
+  done
+  for g in 0 1 2 3; do wait "${pids[$g]}" || { echo "rank $g: node_inputs.sh failed" >&2; rc=1; }; done
+  return $rc
+}
 start() {
   local g fam envs up=0
   [ $PRINT = 1 ] || stop
@@ -56,10 +67,11 @@ start() {
   [ $up = 1 ] || { echo "rank 0 did not come up: see $LOG_DIR/tp4-lane.log on ${N[0]}" >&2; return 1; }
   check && echo "up and answering on ${N[0]}:$PORT" || { echo "up, but the chat check failed" >&2; return 1; }
 }
-case ${1:?start|stop|check|print} in
+case ${1:?start|stop|check|print|inputs} in
   start) start ;;
   stop) stop ;;
   check) check ;;
   print) PRINT=1; start ;;
-  *) echo "start|stop|check|print" >&2; exit 2 ;;
+  inputs) inputs ;;
+  *) echo "start|stop|check|print|inputs" >&2; exit 2 ;;
 esac

@@ -14,6 +14,14 @@ addresses and paths are not in these files; nothing else was changed.
 | `api-gates.json`, `parallel-summary.json` | `gates.py` (6 API gates); 16 replies against the two-node reference, burst and staggered against solo |
 | `vision-gate.json`, `visionref.json`, `vision-four-at-a-time.json` | the image gate (6 checks); 9 image prompts' token ids; the same 9 four at a time, twice |
 
+## `inputs-5940208/`: the run-time inputs from public weights, and the recipe's launch on them (2026-10-09)
+
+| File | What |
+|---|---|
+| `inputs.sha256` | each node's weight file and the token map as `node_inputs.sh` made them (sha256, bytes): byte for byte the served lane's |
+| `api-gates.json`, `parallel-summary.json` | on `scripts/serve.sh start` from those inputs and the kit: `gates.py` (6 API gates); 16 replies against the two-node reference, burst and staggered against solo |
+| `vision-gate.json`, `visionref.json`, `vision-four-at-a-time.json` | the image gate (6 checks); 9 image prompts' token ids; the same 9 four at a time, twice |
+
 ## `throughput-1ca1c10/`: the same model code, a test server at 1,048,576 tokens a request (2026-10-09)
 
 `rows-1.json` decode set a, `rows-2.json` set b, `rows-3.json` 2 and 4 streams, `rows-4.json` / `rows-5.json` 8 and 16
