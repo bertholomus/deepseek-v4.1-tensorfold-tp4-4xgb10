@@ -1,8 +1,8 @@
-# DeepSeek-V4.1-Flash on TensorFold 1.0 (Zig), four GB10 nodes: the kernel kit, v0.1.1 (engine 5940208)
-# 356 files, 708157701 bytes: every file the lane loads from its kit folder.
-# Columns: sha256, bytes, origin, two-node, path. Origin: git = in the recipe repository (351 files); rope = made by tools/make_rope.py (4); bias = made by tools/make_bias_vl.py from DeepSeek's original checkpoint (1). verify_kit.sh makes and checks them all.
-# Two-node: tp2 = byte for byte the same file in our two-node kit v0.6.0 (189 files); - = this lane's own.
-982443b6e233079f4a807c5415465abb5c5a372577c07b0e5f8e14ce610b73e1      492770  git   -    aot/aot.json
+# DeepSeek-V4.1-Flash-1017 on TensorFold 1.0 (Zig), four GB10 nodes: the kernel kit, v0.2.0 (engine b65c8b9)
+# 358 files, 708487795 bytes: every file the lane loads from its kit folder.
+# Columns: sha256, bytes, origin, two-node, path. Origin: git = in the recipe repository (353 files); rope = made by tools/make_rope.py (4); bias = made by tools/make_bias_vl.py from DeepSeek's original checkpoint (1). verify_kit.sh makes and checks them all.
+# Two-node: tp2 = byte for byte the same file in our two-node kit v0.6.0 (190 files); - = this lane's own.
+a3d4f45018f257b6bb7a234f2d1280cec59221a41184f2c76fef9fe3798724e2      497128  git   -    aot/aot.json
 6106ce0cd8a134f211a19864c5b6bde8dad93cb12c0581c7b696849b24a4be7e       26528  git   -    aot/cubins/00831402a76d782416c3dfce1466ebd2b175b8f2d3af4842ec2bf150e8abcc68.cubin
 f2600102d42de260f8da4ec9024a5fda7db7e35eb4c9bcdc582e30a2ff4e77a0      103896  git   tp2  aot/cubins/0224cd0dd05b5f3055ce8917aef29f782e4c15794cb410b0fc8cf3f605ba8d5a.cubin
 34efa4772efe455e87fc22c3259167f8a50757438766adf0a0f71b555686eaaa       42720  git   tp2  aot/cubins/02398abb315041630656419fe25d257cdff9015e4f6be9e7117f751e39c499bd.cubin
@@ -74,8 +74,10 @@ e751973d17f214e326ff808bc14da14835513d4df9ede89f0f5805bc68d40d62       19904  gi
 a56052d762ccf13b1fe2e0e71257e27e640331dd238cbec7e0a1feabcccc6d0a      364208  git   tp2  aot/cubins/345e90b75d0f9226192f48f985e75ec234265fa80122c72086fee305bda2b304.cubin
 0dbf35320ef1966038131af8996182d62c696fa4cd55d9e33bd59c808e5cd70d      235168  git   -    aot/cubins/3477884371fc694c0cc032b4a2fa4688023c84b1a2695ca93da905f44db56da9.cubin
 c0e283f398e52c1bfd8f8b2a87ef1d8fba513189b15906ee5f0ecd408e419e7d       19504  git   -    aot/cubins/34846ba4f23adfd364903c2214cb98770a1438b34ac7a612b55d482e52b2fc00.cubin
+930e243aaa3b493a84c6c740089c19a9055aa3bd7dec14b818d4b56378547b79       99576  git   tp2  aot/cubins/3532848d6a9bbd149676d618bd5c9fae673a7613c152fb95b8443dcffcc6358e.cubin
 059c7cf7de66895b03c41de75553045d28147c53b50226b69e9c52301e950368      340832  git   -    aot/cubins/36d97fb0d2543f74fc85302733bfeea8ca6ed6aa41853eaa8d0b558ecbf1a575.cubin
 040dc2c47b61ffc5dd49e768052471736f2386886f51433e4cd88324d50a7e39       39352  git   tp2  aot/cubins/3763c608eafc4d436b95dabf0c580bc46c3ab29242d9127982fba3f10cad25d5.cubin
+0e0493c405ca3ca530e51e08224ffbef3b7c3f8888db932b80f40b2ca4de4ba0      226160  git   tp2  aot/cubins/3823a84b457609580da2528def31fd28310be1a22cde09dab7287587ba5298ae.cubin
 e9c0ee1e4280d3b9a8c70cc0319b3061de3239c48514380b0b7c5e2a776ed048      245880  git   tp2  aot/cubins/385fc42d54db79ba0f5d1637e4319953b92c2c8e2f115b56b2643f1d815f9c7d.cubin
 625eb765b6b0f1d508d406fdcfe09f448206133bfeb7f53570713b0312b48503      207112  git   -    aot/cubins/3ae1389c02ae49b42cd654bf434858d814b763000da728d127cbdfee2a894ab3.cubin
 f9ad904311b55a46d72cd00233dd500d0497aa6d059992a04df6d6e8d81824e1      222320  git   -    aot/cubins/3c80338f697be2a47ef78cde0f9b90d33f8ff8cc0f20b07a0f5a637f214146b3.cubin
@@ -356,5 +358,5 @@ e1c30aeb3eb357ebf0590025251ad488c93af14814321cb36df5c47ca869f203   142606336  ro
 ee15897f6f340a6e86e1a27acc1eede22a774dff311b0823717ab6f9bb2b029e   142606336  rope  tp2  rope-plain-cos.f32
 bbba9940e95990bb73de48ac3d5c5e1e4468fb6223f2b108b51133179d8f2d28   142606336  rope  tp2  rope-plain-sin.f32
 78d881ad91d9dc36a53cab598e250eaf1f105ef22fbd7b637e07fbf57c08edc3         407  git   tp2  rope.json
-0cbdebfbffed15722f096d6b8290933135d4393d0920059f7bcad4789f19387b       67192  bias  tp2  vision/gate_bias_vl.safetensors
+4745da4b5f24c67170ee24e2c95652e45ba13c0ca0abc2be3cc7a2a3545792d0       67192  bias  -    vision/gate_bias_vl.safetensors
 f4c685d57fd29554ce221947c6b8a92d239bb4e3b4bb723f407d3d59e16c338f      649872  git   tp2  vision/torch_fmha_sm120.cubin

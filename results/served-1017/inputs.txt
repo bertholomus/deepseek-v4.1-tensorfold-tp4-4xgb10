@@ -1,0 +1,13 @@
+# The served lane's run-time inputs for the 1017 weights (engine 5c97635, the source of b65c8b9), and how the public
+# quant reaches them. Each weight file's name holds the first 20 hex digits of the sha256 of its index (the tensors'
+# names, types, shapes and offsets): tf-dsv41-rank-cache --parity --index-only, run on a download of
+# bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw (a2f91e27) with tools/serving_1017.py's two files, prints the
+# same four indexes.
+rank-cache/rank0of4-18024a04ce850c33693a.bin   72,137 MiB of tensors
+rank-cache/rank1of4-2629be88734911a05c18.bin   72,137 MiB of tensors
+rank-cache/rank2of4-9a16440612a1dcdeed60.bin   72,175 MiB of tensors
+rank-cache/rank3of4-077fce8414912c94cb24.bin   72,175 MiB of tensors
+dsv41_token_map.json  sha256 de40bcdd71f24430ba82752ef385093be962adbf845a1c97db39161597d5dc28 (as in v0.1.1)
+# tools/serving_1017.py on the public quant writes:
+serving-1017.safetensors  sha256 d88fe41f756f96693475f8c9fc113ae20442e78712a890c93c068e527e708d1f  132,711,008 bytes
+chat_template.jinja       sha256 b581d19d13f5c678d72ae197781c016c8331174cf69118017f20dadbb7e2e6a4  23,438 bytes

@@ -1,9 +1,9 @@
 {
  "generator": "zig/tests/cuda/nemotron/aot_pack.py",
  "merged": {
-  "primary": "zlrec3/aot",
-  "extra": "zigport/out/aot-all7",
-  "added": 1
+  "primary": "zlrec4/aot",
+  "extra": "kit-v060-full/kit/aot",
+  "added": 2
  },
  "kernels": [
   {
@@ -5512,6 +5512,130 @@
     },
     "HAS_BASE": {
      "int": 1
+    },
+    "PDL": {
+     "int": 1
+    },
+    "HAS_CAND": {
+     "int": 0
+    },
+    "CB": {
+     "int": 8
+    },
+    "KEYS": {
+     "int": 0
+    },
+    "HAS_TMAX": {
+     "int": 0
+    },
+    "SKIP_DEAD": {
+     "int": 1
+    },
+    "DEAD_PAD": {
+     "int": 0
+    }
+   }
+  },
+  {
+   "fn": "_index_score",
+   "hash": "3532848d6a9bbd149676d618bd5c9fae673a7613c152fb95b8443dcffcc6358e",
+   "name": "_index_score",
+   "num_warps": 4,
+   "num_ctas": 1,
+   "shared": 10240,
+   "global_scratch": 0,
+   "global_align": 1,
+   "profile_scratch": 0,
+   "pdl": true,
+   "params": [
+    {
+     "name": "Q",
+     "type": "*bf16",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "K",
+     "type": "*u8",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "KS",
+     "type": "*u8",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "Wt",
+     "type": "*bf16",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "VIS",
+     "type": "*i64",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "OUT",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "n",
+     "type": "i32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "KB",
+     "type": "*i64",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "CAND",
+     "type": "*i64",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "cs",
+     "type": "i32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "TMAX",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "nt",
+     "type": "i32",
+     "div16": true,
+     "nospec": false
+    }
+   ],
+   "consts": {
+    "IH": {
+     "int": 32
+    },
+    "ID": {
+     "int": 128
+    },
+    "BN": {
+     "int": 64
+    },
+    "PACKED": {
+     "int": 1
+    },
+    "HAS_BASE": {
+     "int": 0
     },
     "PDL": {
      "int": 1
@@ -26371,6 +26495,166 @@
     },
     "HAS_BASE": {
      "int": 1
+    },
+    "PDL": {
+     "int": 1
+    },
+    "WPF": {
+     "int": 1
+    }
+   }
+  },
+  {
+   "fn": "_sparse_attn_part",
+   "hash": "3823a84b457609580da2528def31fd28310be1a22cde09dab7287587ba5298ae",
+   "name": "_sparse_attn_part",
+   "num_warps": 4,
+   "num_ctas": 1,
+   "shared": 50176,
+   "global_scratch": 0,
+   "global_align": 1,
+   "profile_scratch": 0,
+   "pdl": true,
+   "params": [
+    {
+     "name": "Q",
+     "type": "*bf16",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "WSRC",
+     "type": "*bf16",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "WLO",
+     "type": "*i64",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "COMP",
+     "type": "*u8",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "CSC",
+     "type": "*u8",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "IDX",
+     "type": "*i64",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "POS",
+     "type": "*i64",
+     "div16": false,
+     "nospec": false
+    },
+    {
+     "name": "PM",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "PL",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "PO",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "SINK",
+     "type": "*fp32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "OUT",
+     "type": "*bf16",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "scale",
+     "type": "fp32",
+     "div16": false,
+     "nospec": false
+    },
+    {
+     "name": "ring_size",
+     "type": "i32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "n_idx",
+     "type": "i32",
+     "div16": true,
+     "nospec": false
+    },
+    {
+     "name": "RBASE",
+     "type": "*i64",
+     "div16": false,
+     "nospec": false
+    },
+    {
+     "name": "CBASE",
+     "type": "*i64",
+     "div16": false,
+     "nospec": false
+    }
+   ],
+   "consts": {
+    "H": {
+     "int": 32
+    },
+    "HD": {
+     "int": 512
+    },
+    "HB": {
+     "int": 16
+    },
+    "WIN": {
+     "int": 128
+    },
+    "BN": {
+     "int": 32
+    },
+    "RING": {
+     "int": 1
+    },
+    "HAS_COMP": {
+     "int": 1
+    },
+    "PACKED": {
+     "int": 1
+    },
+    "SPLITS": {
+     "int": 8
+    },
+    "NBLK": {
+     "int": 20
+    },
+    "FINAL": {
+     "int": 0
+    },
+    "HAS_BASE": {
+     "int": 0
     },
     "PDL": {
      "int": 1

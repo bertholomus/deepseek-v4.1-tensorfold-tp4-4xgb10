@@ -8,14 +8,24 @@ every outside source of the engine; this file lists what the recipe uses.
 
 | Source | License | What we used | How |
 |---|---|---|---|
-| [deepseek-ai/DeepSeek-V4.1-Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash) | MIT, Copyright (c) 2023 DeepSeek | The model; its original shards 47 and 48 (Engram tables); its 43 `ffn.gate.bias_vl` tensors; the rules of its reference code for the Engram constants (`kit/engram.json`) and the RoPE rotation (`kit/tools/make_rope.py`) | Shards loaded at run time, not redistributed. The bias tensors are copied byte for byte into `kit/vision/gate_bias_vl.safetensors` by `kit/tools/make_bias_vl.py`; git does not hold that file. Rules re-implemented; no code copied |
-| [Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw](https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw) | MIT, inherited from the base model | The weights we serve | Loaded at run time. Not redistributed |
-| [TensorFold](https://github.com/ashhart/TensorFold) 1.0.2 | Apache-2.0, Copyright 2026 TensorFold contributors | The serving engine and its OpenAI-compatible server | Forked: [bertholomus/TensorFold `deepseek-v41-zig-tp4`](https://github.com/bertholomus/TensorFold/tree/deepseek-v41-zig-tp4) |
+| [deepseek-ai/DeepSeek-V4.1-Flash-1017](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017) and [deepseek-ai/DeepSeek-V4.1-Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash) | MIT, Copyright (c) 2023 DeepSeek | The model; the 1017 checkpoint's original shards 47 and 48 (Engram tables) and its 43 `ffn.gate.bias_vl` tensors (V4.1-Flash's up to v0.1.1); the rules of its reference code for the Engram constants (`kit/engram.json`) and the RoPE rotation (`kit/tools/make_rope.py`); its reference encoding (`encoding.py`), which our chat template renders | Shards loaded at run time, not redistributed. The bias tensors are copied byte for byte into `kit/vision/gate_bias_vl.safetensors` by `kit/tools/make_bias_vl.py`; git does not hold that file. Rules and the chat format re-implemented (`chat/chat_template.jinja` is ours); no code copied |
+| [bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw](https://huggingface.co/bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw) | MIT, inherited from the base model | The weights we serve since v0.2.0 (our EXL3 quant, made with ExLlamaV3's converter) | Loaded at run time. Not redistributed. `tools/serving_1017.py` adds six of its tensors under the engine's names and types to a download |
+| [Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw](https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-EXL3-2.9bpw) | MIT, inherited from the base model | The weights we served up to v0.1.1 | Loaded at run time. Not redistributed |
+| [TensorFold](https://github.com/ashhart/TensorFold) 1.0.12 (1.0.2 up to v0.1.1) | Apache-2.0, Copyright 2026 TensorFold contributors | The serving engine and its OpenAI-compatible server | Forked: [bertholomus/TensorFold `deepseek-v41-zig-tp4`](https://github.com/bertholomus/TensorFold/tree/deepseek-v41-zig-tp4) |
 | Our two-node recipe, [bertholomus/deepseek-v4.1-tensorfold-tp2-2xgb10](https://github.com/bertholomus/deepseek-v4.1-tensorfold-tp2-2xgb10) | Apache-2.0, same authors | The benchmark and gate clients in `tools/` and the layout of this recipe | Ours, reused |
 | NVIDIA PyTorch container `nvcr.io/nvidia/pytorch:26.07-py3` (PyTorch BSD-3-Clause, Triton MIT, NCCL, Pillow MIT-CMU) | NVIDIA's container license and the components' own licenses | The run-time environment; its PyTorch on the CPU for the RoPE tables (`kit/verify_kit.sh`) | Used as supplied. Not redistributed, except the kernel below |
 | [PyTorch](https://github.com/pytorch/pytorch) and [NVIDIA CUTLASS](https://github.com/NVIDIA/cutlass) | BSD-3-Clause | PyTorch's memory-efficient attention kernel for the vision tower (`fmha_cutlassF_f32_aligned_64x64_rf_sm80`, built on CUTLASS) | Extracted unmodified from the container's `libtorch_cuda.so`; redistributed in binary form as `kit/vision/torch_fmha_sm120.cubin` with the license texts in `kit/LICENSES/` |
 | [Triton](https://github.com/triton-lang/triton) | MIT | The compiler of our kernels in `kit/aot/` | Compiled with; license text in `kit/LICENSES/` |
-| [ExLlamaV3](https://github.com/turboderp-org/exllamav3) | MIT, Copyright (c) 2025 Turboderp | The EXL3 format the kernels in `kit/cubins/` read (through TensorFold's EXL3 module) | Format followed; license text in `kit/LICENSES/` |
+| [ExLlamaV3](https://github.com/turboderp-org/exllamav3) | MIT, Copyright (c) 2025 Turboderp | The EXL3 format the kernels in `kit/cubins/` read (through TensorFold's EXL3 module); its converter made our quant | Format followed; license text in `kit/LICENSES/` |
+
+## Contributors
+
+Since v0.1.1 the engine branch carries two pull requests to our fork: [#4](https://github.com/bertholomus/TensorFold/pull/4)
+by Lucas Peters ([@lucas-peters](https://github.com/lucas-peters)), the prompt indexer's aligned row blocks, and
+[#18](https://github.com/bertholomus/TensorFold/pull/18) by [@lepetitprince716-prog](https://github.com/lepetitprince716-prog),
+the faster load. Its loop guard's novelty signal follows a report by [@Capicua25x](https://github.com/Capicua25x)
+([two-node recipe issue #18](https://github.com/bertholomus/deepseek-v4.1-tensorfold-tp2-2xgb10/issues/18)). Thank
+you. The engine branch's `ATTRIBUTION.md` credits each of them.
 
 ## About the files in `results/`
 
@@ -24,6 +34,6 @@ removed. Nothing else in them was changed.
 
 ## Names
 
-- "DeepSeek" and "DeepSeek-V4.1-Flash" belong to DeepSeek. "DGX Spark" and "GB10" belong to NVIDIA. We use the names
+- "DeepSeek", "DeepSeek-V4.1-Flash" and "DeepSeek-V4.1-Flash-1017" belong to DeepSeek. "DGX Spark" and "GB10" belong to NVIDIA. We use the names
   only to say what this recipe runs and on what hardware.
 - This recipe is not affiliated with or endorsed by DeepSeek, NVIDIA, the TensorFold authors or Mia-AiLab.

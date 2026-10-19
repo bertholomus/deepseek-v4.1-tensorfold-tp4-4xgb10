@@ -1,0 +1,15 @@
+{
+ "cmd": "depth",
+ "base": "http://127.0.0.1:18095",
+ "model": "DeepSeek-V4.1-Flash-TP4",
+ "unix": 1792377275.9673207,
+ "result": [
+  {
+   "length": 131072,
+   "prompt_tokens": 131072,
+   "ttft_s": 48.7932422100057,
+   "tokens": 256,
+   "decode_tps": 140.07176365341104
+  }
+ ]
+}
