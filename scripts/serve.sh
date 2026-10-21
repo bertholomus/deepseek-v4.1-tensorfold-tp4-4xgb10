@@ -56,7 +56,7 @@ start() {
   envs="$envs TENSORFOLD_CUDA_KERNELS=/kit/aot TF_DS_ENGRAM=/engram TF_DS_TOKEN_MAP=/cache/dsv41_token_map.json"
   envs="$envs TF_DS_RDMA_KERNELS=/engine/rdma_gather.fatbin TF_DS_GRAPHS=1 TF_DS_HC_SIDE=1 TF_DS_L2_PREFETCH=1"
   envs="$envs TF_DS_ENGRAM_AIO=1 $ENGINE_ENV"
-  rank "${N[0]}" "$envs" "/engine/tensorfold-native serve /model --host $HOST --port $PORT --name $SERVED_NAME --context $CONTEXT --parallel $PARALLEL $SERVER_FLAGS --backend cuda" \
+  rank "${N[0]}" "$envs" "/engine/tensorfold-native serve /model --host $HOST --port $PORT --name $SERVED_NAME --context $CONTEXT --parallel $PARALLEL $SERVER_FLAGS --backend cuda${RANK0_FLAGS:+ $RANK0_FLAGS}" \
     || { echo "start rank 0 failed" >&2; return 1; }
   [ $PRINT = 1 ] && return 0
   for _ in $(seq 1 240); do

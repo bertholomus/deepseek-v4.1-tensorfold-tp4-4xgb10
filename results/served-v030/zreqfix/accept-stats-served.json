@@ -1,0 +1,79 @@
+{
+ "before": {
+  "drafted": 5549,
+  "accepted": 4324,
+  "depth": {
+   "1": {
+    "drafted": 1644,
+    "reached": 1644,
+    "accepted": 1353
+   },
+   "2": {
+    "drafted": 1398,
+    "reached": 1216,
+    "accepted": 1016
+   },
+   "3": {
+    "drafted": 977,
+    "reached": 841,
+    "accepted": 758
+   },
+   "4": {
+    "drafted": 750,
+    "reached": 640,
+    "accepted": 585
+   },
+   "5": {
+    "drafted": 594,
+    "reached": 515,
+    "accepted": 481
+   }
+  },
+  "position": {
+   "0": 1353,
+   "1": 1016,
+   "2": 758,
+   "3": 585,
+   "4": 481
+  }
+ },
+ "after": {
+  "drafted": 6076,
+  "accepted": 4717,
+  "depth": {
+   "1": {
+    "drafted": 1803,
+    "reached": 1803,
+    "accepted": 1484
+   },
+   "2": {
+    "drafted": 1537,
+    "reached": 1341,
+    "accepted": 1118
+   },
+   "3": {
+    "drafted": 1071,
+    "reached": 920,
+    "accepted": 820
+   },
+   "4": {
+    "drafted": 820,
+    "reached": 696,
+    "accepted": 636
+   },
+   "5": {
+    "drafted": 644,
+    "reached": 558,
+    "accepted": 520
+   }
+  },
+  "position": {
+   "0": 1484,
+   "1": 1118,
+   "2": 820,
+   "3": 636,
+   "4": 520
+  }
+ },
+ "problems": []
+}

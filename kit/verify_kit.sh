@@ -4,7 +4,7 @@
 #   MODEL         the EXL3 checkpoint's folder, or just its config.json: tools/make_rope.py computes the four RoPE
 #                 tables from it on the CPU (PyTorch; without a local torch it runs with docker in IMAGE, default
 #                 nvcr.io/nvidia/pytorch:26.07-py3, the image whose PyTorch made the served tables)
-#   ORIGINAL_DIR  DeepSeek's original checkpoint (deepseek-ai/DeepSeek-V4.1-Flash): tools/make_bias_vl.py copies
+#   ORIGINAL_DIR  DeepSeek's original checkpoint (deepseek-ai/DeepSeek-V4.1-Flash-1017): tools/make_bias_vl.py copies
 #                 vision/gate_bias_vl.safetensors out of it. Without it that file must already be here (the kit/ folder
 #                 on Hugging Face has it).
 #   --kit DIR     the kit folder (default: this script's folder)

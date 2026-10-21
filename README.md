@@ -36,10 +36,90 @@ What it does:
 - Four-node exact split: on the 2.9 bpw weights of v0.1.1 its replies equal the two-node family's token for token in
   our gates; on the 1017 weights, burst and staggered requests equal the solo replies 16 of 16.
 - Image input in user turns and tool results (the vision tower runs on rank 0), as DeepSeek's encoding places it.
-- Up to 1,048,576 tokens a request, 16 streams sharing a 2,097,152-position window, with kept-prompt reuse: a request
-  that repeats a kept prompt's prefix resumes from it instead of prefilling again.
+- Up to 1,048,576 tokens a request, 16 streams sharing a 4,194,304-position window, with kept-prompt reuse: a request
+  that repeats a kept prompt's prefix, images included, resumes from it instead of prefilling again.
+- Structured output: `response_format` (a JSON schema or a JSON object), `guided_choice` and `guided_regex` hold a
+  reply to its grammar.
+- Tool calls in DeepSeek's DSML; with `tool_choice` "required" or a named function, the reply is one calls block, each
+  call an offered tool with its parameters within their schema.
 - Exact DSpark speculative decoding: drafted output equals serial output token for token.
 - OpenAI-compatible HTTP API (TensorFold's server): chat and text completions, streaming, reasoning output, tool calls.
+
+## v0.3.0: what changed
+
+| | v0.2.0 | v0.3.0 | Measured in |
+|---|---|---|---|
+| Engine | `b65c8b9`, on TensorFold 1.0.12 | `5172621`, on TensorFold 1.0.12 | |
+| Kernel kit | 358 files | 362 files: `grammar/` adds libtfgrammar, the grammar library for structured output and forced tool calls, with its licenses | |
+| The streams' shared window (`TF_DS_WINDOW`) | 2,097,152 positions | 4,194,304 positions | |
+| Kept prompt states (`--prompt-cache-gib`) | 0.5 GiB | 2 GiB | |
+| `response_format`, and `tool_choice` "required" or a named function | refused (HTTP 400) | answered within the grammar: structured requests 11 of 11 as asked, sampled forced calls 36 of 36 valid | `zreqfix` |
+| Eight conversations of 399,951 tokens sent together, two turns each | 4 at a time; second turns resumed 0 of 8; turns 1,206 + 1,203 s | 8 at a time; second turns resumed 8 of 8; turns 1,206 + 6 s | `zbigsolo` |
+| Prefill, 131,072 / 262,144 / 524,288-token prompts | 2,667 / 2,492 / 2,211 tok/s | 2,797 / 2,749 / 2,623 tok/s (+4.9 / +10.3 / +18.6 %) | `z1017x` |
+| A conversation's next turn after an image | prefilled again (0 tokens cached) | resumes past the image: 4,096 of 6,288 tokens cached | `zkeptk`, `zreqfix` |
+| A streamed reply that waits for a 97,510-token prompt (two at once) | silent for 34.9 and 68.8 s | a `: keepalive` comment every 15 s: silent for 15.0 and 15.0 s | `zbigsolo`, `zreqfix` |
+| Decode, one stream, set b: code / prose / structured | 135.9 / 79.1 / 186.6 tok/s | 135.8 / 78.7 / 185.5 tok/s (-0.1 / -0.5 / -0.6 %) | `zreqfix` |
+| Two / four streams together | 101.6 / 141.7 tok/s | 100.7 / 140.9 tok/s (-0.9 / -0.5 %) | `zreqfix` |
+| Prefill, 8,192-token prompt | 2,793 tok/s | 2,786 tok/s (-0.2 %) | `zreqfix` |
+| Prefill, 131,072-token prompt | 2,679 tok/s | 2,797 tok/s (+4.4 %) | `zreqfix` |
+| Lowest free memory a node during the eight conversations | 25 / 32 / 33 / 33 GiB | 23 / 30 / 31 / 31 GiB | `zbigsolo` |
+
+Measured in: each row's numbers come from the sessions it names, on our four nodes; their raw outputs are in
+`results/served-v030/<session>/`. `zreqfix` is the gate run of the build v0.3.0 serves (engine `4964e38`, its
+served settings); in the rows that name only it, the v0.2.0 column holds v0.2.0's own numbers. The rows of `zbigsolo`
+and `z1017x` compare two launches of one session: `zbigsolo` ran engine `00da56a` (the v0.3.0 line before its
+kept-state fixes) with v0.2.0's window, prompt cache and no keepalive, then with v0.3.0's; `z1017x` ran v0.2.0's served
+engine `5c97635` with `TF_DS_IDX_SPLIT` unset, then set. A row that names two sessions takes its v0.2.0 column from the
+first: for the image turns, `zkeptk`'s engine `e3c6a7d` (before pull request #28); for the keepalive, `zbigsolo`'s
+first launch. Decode and the streams are level with v0.2.0 (within 1 %); prefill gains with the prompt's length; large
+conversations now run together and resume.
+
+Engine changes since v0.2.0, all on in the served settings (the fork's v0.3.0 merge commit lists them):
+
+- Structured output: a request with `response_format` (`json_schema` or `json_object`), `guided_choice` or
+  `guided_regex` draws within its grammar, drafted rows checked against it too. The grammar comes from libtfgrammar,
+  built from xgrammar and loaded from the kit (`TENSORFOLD_GRAMMAR_LIB`).
+- Forced tool calls: `tool_choice` "required" or a named function answers with one DSML calls block, each call an
+  offered tool (the named one) with its parameters within their schema. The DSML marker is always its own token, so
+  sampled calls stay valid (36 of 36; 29 of 36 before that fix).
+- The prompt shield (`TENSORFOLD_PLAIN_SPECIALS=1`): text in a user turn, a tool result or a tool call's arguments that
+  spells one of the tokenizer's special tokens is encoded as ordinary text; only the chat template's own markers and
+  the operator's text are control tokens. A prompt in which no sender wrote a marker is tokenized as before.
+- Kept prompt states: prompts with images keep and resume their states, matched by the images' digests, and a resumed
+  prompt skips the vision tower for the images it holds (pull request #28 by Manrique, ported); a prefix two
+  conversations share no longer stales the first one's states (pull request #26 by Manrique); a prompt whose newest
+  matching state ends too near its end resumes from an earlier one instead of from the start.
+- The keyed indexer layers' long rows split by columns over the four nodes (`TF_DS_IDX_SPLIT=1`): the same columns
+  out, prefill faster the longer the prompt.
+- The 4,194,304-position window and 2 GiB of kept prompt states (`--prompt-cache-gib 2`): eight 400K-token
+  conversations run at once, and their next turns resume.
+- The stream keepalive (`TENSORFOLD_SSE_KEEPALIVE=15`): a streamed reply that has sent nothing for 15 s sends
+  `: keepalive`, an SSE comment clients skip, so a long prefill does not trip a client's idle timer.
+- Draft statistics: `/metrics` counts the draft head's accepted chains by depth, and `TENSORFOLD_STATS_EVERY=60` writes
+  a stats line to rank 0's log at most once a minute.
+- Sampling: `top_k` 0 or -1 (off) and `top_k` above 56 draw as `top_p` allows instead of failing the request.
+
+Off unless set (unset as served):
+
+- `TF_FILL_CHUNKS=1` (pull request #29 by Manrique, ported): a prompt pass runs in pieces between the other streams'
+  rounds. While a 65,010-token prompt filled, another stream's longest stall fell from 23.4 s to
+  0.8 s, and the long prompt's first token came +19.2 % later (23.5 s to 28.0 s;
+  `zkeptk`, engine `1cd544e`).
+- `TENSORFOLD_REPLY_IDS=1`: a reply's end of reasoning and its DSML calls are read at their token ids, not in the
+  decoded text, so a reply that quotes those markers as text keeps them as words. Every other reply was equal and the
+  speed rows moved -1.2 % to +0.4 % (`zdirdk`, engine `e3c6a7d`).
+- `TF_DS_NEIGHBOR_RDMA=1` (pull request #30 by Scott Woolsey Biggart): the neighbor transport, adjacent-edge RDMA
+  exchanges for four nodes cabled as a physical ring, in place of the RDMA rings. Not measured on our switched network;
+  the engine's `docs/recipes/deepseek-v41-neighbor.md` describes it, with its author's receipts.
+
+Pull request #31 by mrsergiopascal adds a CPU test and a reproducer of the replay cut's position alignment, with its
+write-up; the branch keeps its own replay cut, which the test checks.
+
+Thank you to Manrique ([@hashd1ve](https://github.com/hashd1ve)) for pull requests #26, #28 and #29, Scott Woolsey
+Biggart ([@swbiggart](https://github.com/swbiggart)) for #30, [@mrsergiopascal](https://github.com/mrsergiopascal) for
+#31, [@den13501](https://github.com/den13501), whose report led to the keepalive, and
+[@Capicua25x](https://github.com/Capicua25x), whose report led to the loop guard's novelty signal. The engine branch's
+`ATTRIBUTION.md` credits each of them, and the ideas taken from DeepSeek's DeepInfer and from xgrammar.
 
 ## v0.2.0: what changed
 
@@ -76,42 +156,64 @@ Engine changes since v0.1.1 (the fork's v0.2.0 merge commit lists them):
 
 ## Results
 
-All numbers are ours, measured with our own clients (`kit_bench.py`, `long_check.py` and the gate tools of the engine
-branch) on the four nodes, on the served launch: engine `5c97635`, the 1017 weights, this kit and the served settings
-below. `ENGINE_COMMIT` (`b65c8b9`) is that engine's source with the fork's documents, three comment lines and two test
-lines changed, and it builds the same binaries but for nvcc's build ids (see `RUNNING.md`). Greedy decoding, thinking
-off, unless a row says otherwise. `results/served-1017/` holds the raw outputs.
+All numbers are ours, measured with our own clients (`kit_bench.py` and the gate tools of the engine branch) on the
+four nodes, on the served launch: engine `4964e38`, the 1017 weights, this kit and the served settings below,
+unless a row names another session. `ENGINE_COMMIT` (`5172621`) merges that engine's source (`3821abd`,
+which builds the same binaries but for nvcc's build ids) into the branch's public line, which adds pull requests #30
+(off unless `TF_DS_NEIGHBOR_RDMA` is set) and #31 (a test and its write-up; see `RUNNING.md`). Greedy decoding,
+thinking off, unless a row says otherwise. `results/served-v030/` holds the raw outputs, a folder for each session
+(`results/README.md`).
 
 ### Speed
 
+The gate run of the served build (`zreqfix`):
+
 | Row | Result |
 |---|---|
-| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 135.9 / 79.1 / 186.6 tok/s |
-| Two streams together (256 tokens each, mean of 6) | 101.6 tok/s aggregate |
-| Four streams together (256 tokens each, mean of 6) | 141.7 tok/s aggregate |
-| Four streams sustained for 90 s (256 tokens each) | 183.1 tok/s aggregate |
-| Prefill, 8,192-token prompt (median of 3) | 2,793 tok/s |
-| Prefill, 131,072-token prompt (median of 2) | 2,679 tok/s |
-| Decode after a 131,072-token prompt (256 tokens) | 140.1 tok/s |
+| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 135.8 / 78.7 / 185.5 tok/s |
+| Two streams together (256 tokens each, mean of 6) | 100.7 tok/s aggregate |
+| Four streams together (256 tokens each, mean of 6) | 140.9 tok/s aggregate |
+| Eight streams sustained for 90 s (256 tokens each) | 221.1 tok/s aggregate |
+| Sixteen streams sustained for 90 s (256 tokens each) | 262.0 tok/s aggregate |
+| Prefill, 8,192-token prompt (median of 3) | 2,786 tok/s |
+| Prefill, 32,768-token prompt (median of 3) | 2,835 tok/s |
+| Prefill, 131,072-token prompt (median of 3) | 2,797 tok/s |
+| Lowest free memory a node during these rows | 29 / 30 / 31 / 31 GiB |
 
 ### Long context and kept prompts
 
 | Check | Result |
 |---|---|
-| Three needles in one shared 999,843-token haystack, at depths 0.1, 0.5 and 0.9 | Found 3/3; the first request prefills it (543.5 s), the next two resume from the kept prompt (999,424 tokens cached) in 2.4 and 2.2 s |
-| Four prompts of about 160,000 tokens and a repeat of the first, sent together, then each alone | Burst replies equal the solo replies 5/5; needles found 4/4 in both; drafted equals serial; burst 250.3 s; every solo rerun resumes from its kept prompt (159,744 tokens cached), 4.8 s for all five |
-| Lowest free memory a node during these two checks | 28 / 33 / 33 / 33 GiB |
+| Eight conversations of 399,951 tokens, two turns; each turn's eight requests sent together, each with `max_tokens` 32,768 (`zbigsolo`) | All eight run at once; the second turns resume from their kept prompts 8 of 8; turns 1,206 + 6 s; the 16 replies equal those of v0.2.0's settings |
+| The same with four conversations (`zbigsolo`) | Four at once with both settings; second turns resumed 4 of 4; turns 605.2 + 3.5 s (v0.2.0's settings: 604.0 + 3.6 s) |
+| Lowest free memory a node during the eight | 23 / 30 / 31 / 31 GiB (v0.2.0's settings: 25 / 32 / 33 / 33 GiB) |
+| Image turns on a 2,822-token system prompt (`zreqfix`) | The first image turn resumes the system prompt's kept state (2,048 of 6,267 tokens cached), the next turn resumes past the image (4,096 of 6,288), and that turn with another image in its place resumes up to the image (2,048 of 6,288). Engine `e3c6a7d`, before pull request #28, ran all three from the start (`zkeptk`) |
+| A prompt whose newest matching kept state ends within its last 128 tokens (`zreqfix`) | It resumes from an earlier state: 4,096 of 6,204 tokens cached, and the next turn 6,144 of 8,492. Engine `00da56a`, before the fix, cached 0 and 4,096 (`zbigsolo`) |
+| Nine prompt lengths from 65,535 to 524,287 tokens with the split set (`z1017x`) | All 9 answer, each reply equal to the one with the split unset |
+
+The 999,843-token needle check and the four 160K prompts of v0.2.0 ran with the split unset and the 2,097,152-position
+window; their results are in the v0.2.0 README.
 
 ### Gates
 
+On the gate launch of the served build (`zreqfix`), and where a line says so, again on the served port after the
+promotion:
+
 - Exact chat: 71 of 71 chats (system and developer prompts, tools and tool calls, tool results, reasoning and its
-  effort, multi-turn, response formats) give the same token ids through the server's `/tokenize` as DeepSeek's reference encoding
-  (`encoding.py`, MIT) gives for them, on the gate launch and again on the served port.
+  effort, multi-turn, response formats) give the same token ids through the server's `/tokenize` as DeepSeek's
+  reference encoding (`encoding.py`, MIT) gives for them; 71 of 71 on the served port.
 - The API gates 6 of 6: the model list, a chat probe, a streamed reasoning, a tool call, drafted equals serial, and a
-  burst of four.
-- 16 replies sent as a burst and staggered: equal to their solo replies 16/16 both ways.
-- Vision: the image gate 6/6; 9 image prompts' token ids, then the same 9 four at a time, twice: 18/18 equal to the
-  solo run.
+  burst of four; 6 of 6 on the served port.
+- 16 replies sent as a burst and staggered: equal to their solo replies 16/16 and 16/16.
+- Vision: the image gate 6/6; 9 image prompts' token ids, then the same 9 four at a time, twice:
+  18/18 equal to the solo run.
+- The prompt shield: 14 of 14 cases (in 5 no sender wrote a marker, and they tokenize as before; in
+  9 one did, and the marker stays text); 14 of 14 on the served port.
+- Structured output: 11 of 11 requests as asked (a JSON schema, a JSON object, a choice, a regex; greedy, sampled
+  and with thinking), burst and staggered equal to solo; 11 of 11 on the served port.
+- Forced tool calls: 16 rows (8 requests, whole and streamed) of "required", named and "auto" calls,
+  the forced ones each an offered tool within its schema and the "auto" ones equal to those of the build served before
+  (`1cd544e`), on both ports; and sampled forced requests: 36 of 36 valid, 36 of 36 on the served port.
 
 ### Run-time inputs from the public weights
 
@@ -120,23 +222,32 @@ off, unless a row says otherwise. `results/served-1017/` holds the raw outputs.
 | The download of [bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw](https://huggingface.co/bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw) (revision `a2f91e27`) against the weights the served lane loads | All 41 shards, the index and the configs byte for byte our copy of the converter's output; 192,492 of its 192,496 tensors equal (sha256 per tensor) to the served lane's, and the other four are the Engram q/k that the served lane holds widened to F32 |
 | `tools/serving_1017.py` on that download | Its six tensors equal the served lane's (name, type, shape, sha256); `serving-1017.safetensors` sha256 `d88fe41f...` and `chat_template.jinja` `b581d19d...` (`results/served-1017/inputs.txt`) |
 | Each node's weight file from that download (`tf-dsv41-rank-cache --parity --index-only`, four ranks) | The four indexes hash to the names of the served lane's four weight files; without `serving-1017.safetensors` the writer stops on a missing tensor |
-| The kit from a fresh clone of this repository (`kit/verify_kit.sh`) | 358 of 358 files match `kit/MANIFEST` |
+| The kit from a fresh clone of this repository (`kit/verify_kit.sh`) | 362 of 362 files match `kit/MANIFEST` |
+
+The weights, their readying and each node's weight file are v0.2.0's: the served lane loads the same four weight files
+(`results/served-1017/inputs.txt`), so the first three rows are v0.2.0's checks.
 
 ### Earlier releases
 
-v0.1.0 and v0.1.1 served the 2.9 bpw weights on engine `ad70f4f` and `5940208`. Their tables are in the v0.1.1
-README (tag `v0.1.1`), and their raw outputs stay in `results/` (`served-ad70f4f/`, `inputs-5940208/`,
-`throughput-1ca1c10/`, `probes-1ca1c10/`).
+v0.2.0 served engine `5c97635` on these weights; its tables are in the v0.2.0 README (tag `v0.2.0`) and its raw
+outputs in `results/served-1017/`. v0.1.0 and v0.1.1 served the 2.9 bpw weights on engine `ad70f4f` and `5940208`.
+Their tables are in the v0.1.1 README (tag `v0.1.1`), and their raw outputs stay in `results/` (`served-ad70f4f/`,
+`inputs-5940208/`, `throughput-1ca1c10/`, `probes-1ca1c10/`).
 
 ## The served settings
 
 Rank 0 runs `tensorfold-native serve` with `TF_TP_WORLD=4`; ranks 1-3 run `tf-dsv41-lanes`, which follows it. The
-settings as served: `--context 1048576 --parallel 16`, `TF_DS_WINDOW=2097152` (the streams' shared positions),
-`TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`, `TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`,
-the measured round costs in `TF_DS_ROUND_MS`, CUDA graphs, the side stream, the paced L2 prefetch, Engram reads by AIO,
-and the decode-size exchanges over the RDMA rings. They are v0.1.1's, unchanged. The round costs are the table
-measured on the 2.9 bpw weights: they guide how many tokens a round drafts, and drafted output equals serial output, so
-no reply depends on them. `scripts/serve.sh` spells the launch out; `config.env.example` holds the site settings.
+settings as served: `--context 1048576 --parallel 16` and `--prompt-cache-gib 2` on rank 0, `TF_DS_WINDOW=4194304`
+(the streams' shared positions; the followers' `--pool 4194304`), `TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`,
+`TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`, the measured round costs in
+`TF_DS_ROUND_MS`, `TF_DS_IDX_SPLIT=1`, `TENSORFOLD_PLAIN_SPECIALS=1`, `TENSORFOLD_GRAMMAR_LIB` (the kit's
+`grammar/libtfgrammar.so`), `TENSORFOLD_SSE_KEEPALIVE=15`, `TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side stream,
+the paced L2 prefetch, Engram reads by AIO, and the decode-size exchanges over the RDMA rings. New since v0.2.0: the
+window (2,097,152 before), the prompt cache (0.5 GiB before), and the split, the shield, the grammar library, the
+keepalive and the stats line (unset before). `TF_FILL_CHUNKS`, `TENSORFOLD_REPLY_IDS` and `TF_DS_NEIGHBOR_RDMA` are
+unset. The round costs are the table measured on the 2.9 bpw weights: they guide how many tokens a round drafts, and
+drafted output equals serial output, so no reply depends on them. `scripts/serve.sh` spells the launch out;
+`config.env.example` holds the site settings.
 
 ## Requirements
 
@@ -153,10 +264,13 @@ no reply depends on them. `scripts/serve.sh` spells the launch out; `config.env.
 
 ## License and attribution
 
-This recipe is licensed under Apache-2.0 (`LICENSE`). The engine branch keeps TensorFold's Apache-2.0 license, lists
-the upstream files it changes in its `NOTICE` and every outside source in its `ATTRIBUTION.md`. The weights are MIT
-(DeepSeek; our EXL3 quant inherits it). The chat template is ours, written to render what DeepSeek's reference
-encoding (MIT) renders. `kit/` holds compiled kernels: our own (Apache-2.0) and PyTorch's attention kernel for the
-vision tower, unmodified (BSD-3-Clause); `kit/KIT-LICENSES.md` gives each file's source and license. `ATTRIBUTION.md`
-here lists what this recipe uses. "DeepSeek" belongs to DeepSeek and "DGX Spark" and "GB10" to NVIDIA; this recipe is
-not affiliated with or endorsed by DeepSeek, NVIDIA, the TensorFold authors or Mia-AiLab.
+This recipe is licensed under Apache-2.0 (`LICENSE`). The engine branch keeps TensorFold's licenses (Apache-2.0 from
+TensorFold 0.6.0, and the MIT notice of the code written before it), lists the upstream files it changes in its
+`NOTICE` and every outside source in its `ATTRIBUTION.md`. The weights are MIT (DeepSeek; our EXL3 quant inherits it).
+The chat template is ours, written to render what DeepSeek's reference encoding (MIT) renders. `kit/` holds compiled
+code: our own Triton kernels (Apache-2.0), the EXL3 kernels of TensorFold's EXL3 module with our additions
+(Apache-2.0, and TensorFold's MIT notice for its code written before 0.6.0), PyTorch's attention kernel for the vision
+tower, unmodified (BSD-3-Clause), and libtfgrammar, xgrammar (Apache-2.0) built with TensorFold's shim and the headers
+it bundles (dlpack, Apache-2.0; picojson, BSD-2-Clause); `kit/KIT-LICENSES.md` gives each file's source and license.
+`ATTRIBUTION.md` here lists what this recipe uses. "DeepSeek" belongs to DeepSeek and "DGX Spark" and "GB10"
+to NVIDIA; this recipe is not affiliated with or endorsed by DeepSeek, NVIDIA, the TensorFold authors or Mia-AiLab.

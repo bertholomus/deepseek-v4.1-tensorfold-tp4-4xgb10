@@ -4,17 +4,21 @@ Copyright 2026 BertholomusAI (Albert Lee, https://github.com/bertholomus)
 This recipe (scripts, tools and documents) is licensed under the Apache License, Version 2.0. See LICENSE.
 
 It contains no model weights and no third-party source code. chat/chat_template.jinja is ours, written to render
-what DeepSeek's reference encoding renders. Its kit/ folder holds compiled kernels: our own, and
-PyTorch's attention kernel for the vision tower, unmodified, in binary form; kit/KIT-LICENSES.md gives each file's
-source and license and kit/LICENSES/ holds the license texts. It runs, or was built with reference to, the third-party
-work below. ATTRIBUTION.md says what was taken from each one and how.
+what DeepSeek's reference encoding renders. Its kit/ folder holds compiled code: our own kernels, TensorFold's EXL3
+kernels with our additions, PyTorch's attention kernel for the vision tower, unmodified, and libtfgrammar, the
+grammar library built from xgrammar, in binary form; kit/KIT-LICENSES.md gives each file's source and license, and
+kit/LICENSES/ and kit/grammar/ hold the license texts. It runs, or was built with reference to, the third-party work
+below. ATTRIBUTION.md says what was taken from each one and how.
 
 TensorFold
-  Copyright 2026 TensorFold contributors. Apache License 2.0.
+  Copyright 2026 TensorFold contributors. Apache License 2.0 from TensorFold 0.6.0; code written before 0.6.0
+  keeps its MIT notice (MIT License, Copyright (c) 2026 TensorFold contributors).
   https://github.com/ashhart/TensorFold
   The serving engine. Our engine for this model is branch deepseek-v41-zig-tp4 of our fork
   (https://github.com/bertholomus/TensorFold), which keeps TensorFold's LICENSE and upstream license texts, lists the
   upstream files it changes in its NOTICE and every outside source in its ATTRIBUTION.md.
+  kit/cubins/ holds TensorFold's EXL3 kernels, compiled, with our additions; their code written before TensorFold
+  0.6.0 keeps its MIT notice, kit/LICENSES/TensorFold-MIT.txt (TensorFold's LICENSES/MIT.txt, unmodified).
 
 DeepSeek-V4.1-Flash-1017 and DeepSeek-V4.1-Flash
   Copyright (c) 2023 DeepSeek. MIT License (inference code and weights).
@@ -55,3 +59,14 @@ ExLlamaV3
   Copyright (c) 2025 Turboderp. MIT License.
   The EXL3 format the kernels in kit/cubins/ read (through TensorFold's EXL3 module). License text:
   kit/LICENSES/ExLlamaV3-MIT.txt.
+
+xgrammar, with dlpack and picojson
+  xgrammar: Copyright (c) 2024 by XGrammar Contributors. Apache License 2.0. https://github.com/mlc-ai/xgrammar
+  Its NOTICE: "XGrammar Copyright (c) 2024 by XGrammar Contributors".
+  dlpack: Copyright 2017 by Contributors. Apache License 2.0. https://github.com/dmlc/dlpack
+  picojson: Copyright 2009-2010 Cybozu Labs, Inc. and 2011-2014 Kazuho Oku. BSD 2-Clause License.
+  https://github.com/kazuho/picojson
+  kit/grammar/libtfgrammar.so is TensorFold's shim (zig/src/grammar/tf_grammar.cc of TensorFold 1.0.12, Apache
+  License 2.0) compiled with xgrammar v0.2.8's C++ sources and the headers xgrammar bundles (dlpack, picojson), for
+  structured output and forced tool calls. License texts: kit/grammar/ (xgrammar's license and NOTICE, dlpack's
+  license) and kit/LICENSES/picojson-BSD-2-Clause.txt.

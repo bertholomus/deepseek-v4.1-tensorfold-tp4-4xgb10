@@ -1,0 +1,17 @@
+{"turn": 1, "conv": 0, "comment_lines": [], "first_token": 151.05, "end": 904.68, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 151.044177802, "lane_prefill": 150.654111706}
+{"turn": 1, "conv": 1, "comment_lines": [], "first_token": 301.73, "end": 603.71, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 301.519149597, "lane_prefill": 150.67939218}
+{"turn": 1, "conv": 2, "comment_lines": [], "first_token": 452.26, "end": 603.75, "prompt_tokens": 399952, "cached": 0, "finish": "stop", "lane_ttft": 451.846988777, "lane_prefill": 150.53426968}
+{"turn": 1, "conv": 3, "comment_lines": [], "first_token": 602.89, "end": 1055.07, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 602.270597568, "lane_prefill": 150.629605163}
+{"turn": 1, "conv": 4, "comment_lines": [], "first_token": 754.16, "end": 1206.02, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 753.329017073, "lane_prefill": 150.373515516}
+{"turn": 1, "conv": 5, "comment_lines": [], "first_token": 904.45, "end": 1205.82, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 903.413707102, "lane_prefill": 150.295988906}
+{"turn": 1, "conv": 6, "comment_lines": [], "first_token": 1054.92, "end": 1205.93, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 1053.678457688, "lane_prefill": 150.204010379}
+{"turn": 1, "conv": 7, "comment_lines": [], "first_token": 1205.4, "end": 1206.05, "prompt_tokens": 399951, "cached": 0, "finish": "stop", "lane_ttft": 1203.946770667, "lane_prefill": 150.289673765}
+{"turn": 2, "conv": 0, "comment_lines": [], "first_token": 150.66, "end": 601.41, "prompt_tokens": 399978, "cached": 0, "finish": "stop", "lane_ttft": 150.649749169, "lane_prefill": 150.442343275}
+{"turn": 2, "conv": 1, "comment_lines": [], "first_token": 301.02, "end": 751.43, "prompt_tokens": 399982, "cached": 0, "finish": "stop", "lane_ttft": 300.810087419, "lane_prefill": 150.366501189}
+{"turn": 2, "conv": 2, "comment_lines": [], "first_token": 451.03, "end": 901.62, "prompt_tokens": 399989, "cached": 0, "finish": "stop", "lane_ttft": 450.606470741, "lane_prefill": 150.002970467}
+{"turn": 2, "conv": 3, "comment_lines": [], "first_token": 600.84, "end": 901.65, "prompt_tokens": 399988, "cached": 0, "finish": "stop", "lane_ttft": 600.212197316, "lane_prefill": 149.808901543}
+{"turn": 2, "conv": 4, "comment_lines": [], "first_token": 751.27, "end": 1202.73, "prompt_tokens": 399978, "cached": 0, "finish": "stop", "lane_ttft": 750.43601683, "lane_prefill": 149.826543157}
+{"turn": 2, "conv": 5, "comment_lines": [], "first_token": 901.45, "end": 1202.9, "prompt_tokens": 399985, "cached": 0, "finish": "stop", "lane_ttft": 900.411972029, "lane_prefill": 149.979097498}
+{"turn": 2, "conv": 6, "comment_lines": [], "first_token": 1051.88, "end": 1203.04, "prompt_tokens": 399986, "cached": 0, "finish": "stop", "lane_ttft": 1050.637912823, "lane_prefill": 150.191126353}
+{"turn": 2, "conv": 7, "comment_lines": [], "first_token": 1202.42, "end": 1203.07, "prompt_tokens": 399985, "cached": 0, "finish": "stop", "lane_ttft": 1200.972587, "lane_prefill": 150.539689778}
+{"walls": [1206.05, 1203.07], "most_running": 4, "most_waiting": 7}
