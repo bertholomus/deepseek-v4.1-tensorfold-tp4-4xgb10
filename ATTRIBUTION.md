@@ -41,6 +41,13 @@ test and a reproducer of the replay cut's positions. Its stream keepalive follow
 [@den13501](https://github.com/den13501) ([two-node recipe issue #12](https://github.com/bertholomus/deepseek-v4.1-tensorfold-tp2-2xgb10/issues/12)).
 Thank you.
 
+Since v0.3.0 the engine branch carries two pull requests by [@Blackwellboy](https://github.com/Blackwellboy), made
+for the two-node branch and picked onto the four-node line, each off unless set:
+[#33](https://github.com/bertholomus/TensorFold/pull/33) (`TF_DS_SOLO_OVERHEAD`: a lone stream's head windows priced
+at the fixed draft allowance) and [#34](https://github.com/bertholomus/TensorFold/pull/34) (`TF_DS_NO_COPIES`: a
+drafted stream without its suffix-lookup copy windows). Their three commits keep Blackwellboy as author; the two that
+adapt the pick to the four-node line also name Claude, which made the adaptation. Thank you.
+
 Our commits to this recipe, and many of ours to the engine branch, name Claude (Anthropic's AI assistant), which
 helped write them, in a `Co-Authored-By` trailer.
 

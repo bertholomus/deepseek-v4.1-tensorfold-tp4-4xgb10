@@ -1,0 +1,71 @@
+{
+ "cmd": "prefill",
+ "base": "http://127.0.0.1:18095",
+ "model": "DeepSeek-V4.1-Flash-TP4",
+ "unix": 1792624787.6631856,
+ "result": [
+  {
+   "length": 8192,
+   "rep": 0,
+   "prompt_tokens": 8192,
+   "ttft_s": 3.0232189829694107,
+   "prefill_tps": 2709.6945494678666
+  },
+  {
+   "length": 8192,
+   "rep": 1,
+   "prompt_tokens": 8192,
+   "ttft_s": 2.981169179023709,
+   "prefill_tps": 2747.9151661841493
+  },
+  {
+   "length": 8192,
+   "rep": 2,
+   "prompt_tokens": 8192,
+   "ttft_s": 2.921514162037056,
+   "prefill_tps": 2804.0254284744055
+  },
+  {
+   "length": 32768,
+   "rep": 0,
+   "prompt_tokens": 32768,
+   "ttft_s": 11.594385733013041,
+   "prefill_tps": 2826.1954323892032
+  },
+  {
+   "length": 32768,
+   "rep": 1,
+   "prompt_tokens": 32768,
+   "ttft_s": 11.50150966399815,
+   "prefill_tps": 2849.017299230717
+  },
+  {
+   "length": 32768,
+   "rep": 2,
+   "prompt_tokens": 32768,
+   "ttft_s": 11.440959355037194,
+   "prefill_tps": 2864.0954821304385
+  },
+  {
+   "length": 131072,
+   "rep": 0,
+   "prompt_tokens": 131072,
+   "ttft_s": 46.729357759002596,
+   "prefill_tps": 2804.9176424802986
+  },
+  {
+   "length": 131072,
+   "rep": 1,
+   "prompt_tokens": 131072,
+   "ttft_s": 46.636252325959504,
+   "prefill_tps": 2810.5174293141126
+  },
+  {
+   "length": 131072,
+   "rep": 2,
+   "prompt_tokens": 131072,
+   "ttft_s": 46.59836013801396,
+   "prefill_tps": 2812.8028456751254
+  }
+ ]
+}

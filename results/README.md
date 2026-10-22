@@ -4,6 +4,52 @@ Our own measurements of our own engine on four GB10 nodes, as the README's table
 addresses and paths are not in these files; nothing else was changed, except where a section says a file holds only
 a part of a check's output.
 
+## `served-v031/`: v0.3.1, a folder for each session on the four nodes (2026-10-21)
+
+Each of the README's v0.3.1 rows names the session it comes from. The gate runs used the served launch on a second
+port (18095); `*-served.json` and `mem-served-watch.txt` were taken on the served port after the build was promoted.
+Each session's `result.txt` holds its verdicts as the session wrote them, with private host names and paths taken
+out; a file it names is named without its folder.
+
+### `z3334/`: the build v0.3.1 serves, engine `37df889`, against the build served before, engine `4964e38` (2026-10-21)
+
+The window was 25,165,824 positions in every launch: engine `4964e38` (a), then `37df889` with both new
+settings unset (b), with `TF_DS_SOLO_OVERHEAD=1` (s), with `TF_DS_NO_COPIES=1` (n) and with both (sn). The gate files
+below are b's, with a's and the served port's where a name says so.
+
+| File | What |
+|---|---|
+| `result.txt` | the session's verdicts: a line a launch with each check and the 16 rows against a's, then the promotion |
+| `rows-a/` to `rows-sn/`: `rows-1.json` to `rows-7.json` | `rows-1.json` to `rows-6.json`: `kit_bench.py` decode set a (512 tokens) and set b (384 tokens), median of 3; 2 and 4 streams (six reps); 8 and 16 streams sustained for 90 s; prefill 8K / 32K / 128K (three reps each). `rows-7.json`: set c, replies that copy code, JSON or quoted text from the prompt (512 tokens, median of 6), from our lane tool |
+| `rows-a/mem.txt` to `rows-sn/mem.txt` | each node's free memory (MemAvailable, GiB) about every 15 s during the rows, nodes named by rank |
+| `rowcmp-b.log`, `rowcmp-s.log`, `rowcmp-n.log`, `rowcmp-sn.log` | each launch's 16 rows against a's (one decimal), then the verdict |
+| `exact-chat.json`, `exact-chat-served.json` | the exact-chat check: 71 chats, each case's `/tokenize` ids against those of DeepSeek's reference encoding (`equal`) |
+| `api-gates.json`, `api-gates-served.json`, `parallel-summary.json` | `gates.py` (6 API gates); 16 replies as a burst and staggered, against solo |
+| `vision-gate.json`, `visionref.json`, `vision-four-at-a-time.json` | the image gate (6 checks); 9 image prompts' token ids; the same 9 four at a time, twice |
+| `shield.json`, `shield-served.json` | the prompt shield: 14 conversations' token ids, with and without spelled special tokens |
+| `structured.json`, `structured-served.json` | 12 structured requests solo, as a burst and staggered. As in v0.3.0, the verdict counts the 12th, `tool_choice` "required", as failed (the check expects a refusal); the forced-call files judge the calls |
+| `dsml.json`, `dsml-served.json`, `dsml-before.json` | 16 rows of "required", named and "auto" tool calls (eight requests, whole and streamed); `dsml-before.json` on a, every row equal to the other two |
+| `forced-calls.json`, `forced-calls-served.json`, `forced-calls-before.json` | 36 sampled forced requests: each row's calls, finish and counts of the DSML marker's token; `forced-calls-before.json` on a |
+| `accept-stats.json`, `accept-stats-served.json` | the draft head's accepted chains by depth, from `/metrics` |
+| `sampler.json` | sampling with `top_k` off and above 56 |
+| `reply-ids.json` | 16 replies that quote the reasoning end or the DSML marker, `TENSORFOLD_REPLY_IDS` unset |
+| `keepalive.json`, `keepalive-served.json` | two streamed 97,510-token prompts at once: each SSE comment's time and text, the longest silence before the first token |
+| `kept-states.json` | eight turns over kept states: image turns, and two conversations on one system prompt |
+| `resume.json` | four prompts of one text: the resume when the newest kept state ends near a prompt's end |
+| `fill.json` | a stream's stalls while a 65,010-token prompt fills, `TF_FILL_CHUNKS` unset |
+
+### `cmpp16/` and `cmpp25/`: the window raised on v0.3.0's build, engine `4964e38` (2026-10-21)
+
+Each session launched the served build twice, one launch after the other: `cmpp16` with 4,194,304 positions (a),
+then 16,777,216 (b); `cmpp25` with 16,777,216 (a), then 25,165,824 (b). b ran a's checks and compared every
+reply with a's; then the session promoted b and checked the served port.
+
+| File | What |
+|---|---|
+| `result.txt` | the session's 47 check lines, its prefill and memory lines, and the promotion |
+| `knob-a-prefill.json`, `knob-b-prefill.json` | a 93,335-token prompt's prefill on a and on b, three reps (`summary` holds the median); the prompt file is named without its folder |
+| `mem-a-watch.txt`, `mem-b-watch.txt`, `mem-served-watch.txt` | each node's free memory (MemAvailable, GiB) about every 15 s during a's checks, b's checks and on the served port, nodes named by rank |
+
 ## `served-v030/`: v0.3.0, a folder for each session on the four nodes (2026-10-20 and 2026-10-21)
 
 Each of the README's v0.3.0 rows names the session it comes from. The gate runs used the served launch on a second

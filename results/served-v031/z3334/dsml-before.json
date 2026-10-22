@@ -1,0 +1,224 @@
+{
+ "model": "DeepSeek-V4.1-Flash-TP4",
+ "max_tokens": 512,
+ "rows": {
+  "required-think": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "required-think stream": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "required-chat": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "required-chat stream": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "required-hello": {
+   "status": 200,
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "now",
+     {}
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 22
+  },
+  "required-hello stream": {
+   "status": 200,
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "now",
+     {}
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 22
+  },
+  "required-single": {
+   "status": 200,
+   "reasoning": "We need answer requires weather for Oslo and Bergen. Need call weather both in parallel.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 57
+  },
+  "required-single stream": {
+   "status": 200,
+   "reasoning": "We need answer requires weather for Oslo and Bergen. Need call weather both in parallel.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 57
+  },
+  "named-now": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I don't have a weather tool—only a `now` tool that gives current time. I should be honest that I can't check weather, but I could offer the current time. Let me call now to give something useful? Actually the time isn't weather. But it might be helpful context. I should just be honest: I don't have weather access. Maybe call now to note the date/time so they know freshness? That seems marginally useful but not necessary. I'll just answer honestly without a tool call—but the tool is available and could be relevant for context. I think a brief honest answer is best; calling `now` doesn't help answer weather. I'll skip it.\n\nActually, providing the current time could help them interpret a forecast they look up. But it's not needed. I'll answer directly.",
+   "content": "",
+   "calls": [
+    [
+     "now",
+     {}
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 198
+  },
+  "named-now stream": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I don't have a weather tool—only a `now` tool that gives current time. I should be honest that I can't check weather, but I could offer the current time. Let me call now to give something useful? Actually the time isn't weather. But it might be helpful context. I should just be honest: I don't have weather access. Maybe call now to note the date/time so they know freshness? That seems marginally useful but not necessary. I'll just answer honestly without a tool call—but the tool is available and could be relevant for context. I think a brief honest answer is best; calling `now` doesn't help answer weather. I'll skip it.\n\nActually, providing the current time could help them interpret a forecast they look up. But it's not needed. I'll answer directly.",
+   "content": "",
+   "calls": [
+    [
+     "now",
+     {}
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 198
+  },
+  "auto-think": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "auto-think stream": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "auto-chat": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "auto-chat stream": {
+   "status": 200,
+   "reasoning": "The user asks about weather in Oslo. I should call the weather tool. No days specified — just today.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 61
+  },
+  "auto-hello": {
+   "status": 200,
+   "reasoning": "",
+   "content": "Hello!",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 4
+  },
+  "auto-hello stream": {
+   "status": 200,
+   "reasoning": "",
+   "content": "Hello!",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 4
+  }
+ }
+}

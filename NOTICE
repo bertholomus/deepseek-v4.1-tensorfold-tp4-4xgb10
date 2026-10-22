@@ -17,6 +17,9 @@ TensorFold
   The serving engine. Our engine for this model is branch deepseek-v41-zig-tp4 of our fork
   (https://github.com/bertholomus/TensorFold), which keeps TensorFold's LICENSE and upstream license texts, lists the
   upstream files it changes in its NOTICE and every outside source in its ATTRIBUTION.md.
+  The branch carries pull requests to our fork by Lucas Peters (#4), lepetitprince716-prog (#18), Manrique (#26,
+  and #28 and #29 ported from the two-node branch), Scott Woolsey Biggart (#30), mrsergiopascal (#31) and
+  Blackwellboy (#33 and #34). ATTRIBUTION.md credits each of them.
   kit/cubins/ holds TensorFold's EXL3 kernels, compiled, with our additions; their code written before TensorFold
   0.6.0 keeps its MIT notice, kit/LICENSES/TensorFold-MIT.txt (TensorFold's LICENSES/MIT.txt, unmodified).
 

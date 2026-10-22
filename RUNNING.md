@@ -1,20 +1,19 @@
 # Running it
 
 What follows is how we run the served build. `scripts/serve.sh` is our served launch with the site values moved to
-`config.env`; nothing else in it changed but its `inputs` command, which the launch never runs. v0.3.0 changes the
-served settings (section 3) and adds the grammar library to the kit (section 2); the weights and how they are readied
-are v0.2.0's.
+`config.env`; nothing else in it changed but its `inputs` command, which the launch never runs. v0.3.1 changes one
+served setting, the window (section 3); the kit is v0.3.0's, and the weights and how they are readied are v0.2.0's.
 
 ## 1. The engine
 
 Clone our TensorFold fork at the commit in `ENGINE_COMMIT` (branch `deepseek-v41-zig-tp4`). That commit merges the
-served engine's source (`3821abd`, the merge's second parent) into the branch's public line and brings the fork's
-NOTICE, ATTRIBUTION.md, README note and THIRD_PARTY_NOTICES.md up to v0.3.0. The public line adds two pull requests
-the served build did not carry: #30, the neighbor transport, which runs only with `TF_DS_NEIGHBOR_RDMA=1`, and #31, a
-CPU test of the replay cut. `3821abd`, built as below, gives the served binaries but for nvcc's build ids.
-`ENGINE_COMMIT`'s binaries also hold #30's code, and their ranks exchange a 48-byte settings frame at the start (40
-before), so run the same build on all four nodes. Build the native engine for the GB10's aarch64 + sm_121 with Zig
-0.17.0 and the CUDA toolchain of `nvcr.io/nvidia/pytorch:26.07-py3`:
+served engine's source (`f493858`, the merge's second parent) into the branch's public line and brings the fork's
+NOTICE, ATTRIBUTION.md and README note up to v0.3.1. Both commits carry pull requests #33 and #34, each off unless set
+(section 3). The public line adds two pull requests the served build did not carry: #30, the neighbor transport, which
+runs only with `TF_DS_NEIGHBOR_RDMA=1`, and #31, a CPU test of the replay cut. `f493858`, built as below, gives the
+served binaries but for nvcc's build ids. `ENGINE_COMMIT`'s binaries also hold #30's code, and their ranks exchange a
+48-byte settings frame at the start (40 before), so run the same build on all four nodes. Build the native engine for
+the GB10's aarch64 + sm_121 with Zig 0.17.0 and the CUDA toolchain of `nvcr.io/nvidia/pytorch:26.07-py3`:
 
 ```sh
 zig build install native -Dtarget=aarch64-linux-gnu.2.28 -Doptimize=ReleaseFast -Dnvcc=/usr/local/cuda/bin/nvcc -Dsm=121
@@ -59,7 +58,7 @@ as a fatbin for sm_121; without `TF_DS_RDMA_KERNELS` the engine uses its embedde
   needs the `tokenizers` package (without it on the host, it runs in `IMAGE` with docker). `CACHE_DIR/rank-cache` must
   not hold another file of the same rank. On our nodes the four took 146 s together. Each file's name holds the hash
   of its index; `results/served-1017/inputs.txt` lists the four names our served lane loads and the token map's sha256
-  (the 1017 tokenizer is V4.1-Flash's, so the map is v0.1.1's). v0.3.0 loads the same four files.
+  (the 1017 tokenizer is V4.1-Flash's, so the map is v0.1.1's). v0.3.0 and v0.3.1 load the same four files.
 - `KIT_DIR`, the kernel kit: this repository's `kit/` (see `kit/README.md`): `aot/` (the family's Triton kernels,
   compiled and captured by the recorder in the engine's `tools/dsv41-zig/rec/`), `cubins/` (its extension kernels),
   `engram.json`, the RoPE tables and their digests (`rope.json`), for images `vision/`, and `grammar/`
@@ -102,9 +101,14 @@ such request. A streamed reply that has sent nothing for 15 s sends `: keepalive
 0's log gets a stats line (the draft head's accepted chains by depth) at most once a minute, and `/metrics` counts
 them.
 
-`config.env.example` holds the served settings: `ENGINE_ENV` (every rank's environment), `FOLLOW_FLAGS` (ranks 1-3)
-and `RANK0_FLAGS` (rank 0's own flags after the site's `SERVER_FLAGS`). Leave `TF_FILL_CHUNKS`, `TENSORFOLD_REPLY_IDS`
-and `TF_DS_NEIGHBOR_RDMA` unset to serve as we do; the README says what each does when set.
+`config.env.example` holds the served settings: `ENGINE_ENV` (every rank's environment), `FOLLOW_FLAGS` (ranks 1-3) and
+`RANK0_FLAGS` (rank 0's own flags after the site's `SERVER_FLAGS`). Leave `TF_FILL_CHUNKS`, `TENSORFOLD_REPLY_IDS`,
+`TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES` unset to serve as we do; the README says what each
+does when set.
+
+The served window, 25,165,824 positions (`TF_DS_WINDOW` in `ENGINE_ENV`, `--pool` in `FOLLOW_FLAGS`), leaves about
+10 GiB free on each node (11 to 13 GiB on ours at the lowest). On nodes that need more room, set 16,777,216 in both
+places and in `WINDOW`, which records it: 18 to 20 GiB stayed free on ours, with every reply equal (README, v0.3.1).
 
 ## 4. Check
 
@@ -115,6 +119,6 @@ follow-up questions resume from the kept prompt), `lensweep.py` (prompt lengths)
 lane's token ids for the pictures in `tools/vision/images/cmp`; `vprobe.py` and `vprobe_cmp.py` against
 `lane-probe.json`, with the format corpus `vfmt.py` builds). `lane-ref.json` and `lane-probe.json` were recorded on
 the 2.9 bpw weights; on the 1017 weights we compare the four-at-a-time run with the solo run instead. The exact-chat
-check (71 cases with DeepSeek's reference renderings), the 16-reply check and the checks of structured output, forced
-tool calls, the prompt shield, kept states and large conversations are our lane tools and are not in this release;
-their reports are in `results/served-v030/`.
+check (71 cases with DeepSeek's reference renderings), the 16-reply check, the copy rows (set c) and the checks of
+structured output, forced tool calls, the prompt shield, kept states and large conversations are our lane tools and
+are not in this release; their reports are in `results/served-v031/` and `results/served-v030/`.

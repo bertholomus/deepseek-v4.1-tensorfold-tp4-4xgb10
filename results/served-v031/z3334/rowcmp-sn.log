@@ -1,0 +1,17 @@
+{"row": "set a code", "served": 107.8, "candidate": 107.1, "change_pct": -0.7}
+{"row": "set a prose", "served": 71.0, "candidate": 71.7, "change_pct": 1.0}
+{"row": "set a structured", "served": 138.5, "candidate": 143.5, "change_pct": 3.6}
+{"row": "set b code", "served": 135.1, "candidate": 135.8, "change_pct": 0.5}
+{"row": "set b prose", "served": 78.4, "candidate": 78.5, "change_pct": 0.2}
+{"row": "set b structured", "served": 185.7, "candidate": 185.7, "change_pct": -0.0}
+{"row": "c2", "served": 100.9, "candidate": 100.8, "change_pct": -0.1}
+{"row": "c4", "served": 140.9, "candidate": 142.1, "change_pct": 0.8}
+{"row": "8 streams", "served": 220.4, "candidate": 221.1, "change_pct": 0.3}
+{"row": "16 streams", "served": 261.8, "candidate": 261.7, "change_pct": -0.0}
+{"row": "prefill 8K", "served": 2784.1, "candidate": 2772.6, "change_pct": -0.4}
+{"row": "prefill 32K", "served": 2847.4, "candidate": 2843.8, "change_pct": -0.1}
+{"row": "prefill 128K", "served": 2807.0, "candidate": 2797.9, "change_pct": -0.3}
+{"row": "set c copy-code", "served": 152.2, "candidate": 154.9, "change_pct": 1.8}
+{"row": "set c copy-json", "served": 153.4, "candidate": 161.7, "change_pct": 5.5}
+{"row": "set c quote", "served": 163.2, "candidate": 158.5, "change_pct": -2.9}
+WORSE: set c quote -2.9 %

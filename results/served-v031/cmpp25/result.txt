@@ -1,0 +1,51 @@
+check launch A: PASS start-a.log names the pin 4964e38f3509 server, lanes: a forced DSML call's marker is always its token
+check settings A: PASS rank 0 names a 2.0 GiB prompt cache, the shield and the stats line
+check gates A: PASS gates 6 ok=True
+check parallel A: PASS solo 16 replies, burst 16/16, staggered 16/16 == solo
+check solo done A: PASS 16 of 16 done lines
+check vision A: PASS vision gate 6/6, visionref 9/9 answered
+check exact chat A: PASS exact chat: 71 of 71 equal
+check shield A: PASS shield recorded 14 conversations as served: 14/14 answered; /tokenize of 120018 bytes 0.0104 s
+check sampler A: PASS di_sampler_check: PASS
+check structured A: PASS structured: 11/11 other requests as specified, tool_choice "required" a call (finish tool_calls), burst 12 and staggered 12 of 12 == solo
+check grammar A: PASS rank 0: structured output: xgrammar over 129280 tokens
+check reply ids A: PASS di_replyids_check: recorded 16 rows -> zkept-replyids-a.json
+check dsml A: PASS dsml recorded as served: 10/10 forced rows answered, 6/6 auto rows answered
+check acceptstats A: PASS di_acceptstats_check: PASS (the depth families add up)
+check stats lines A: PASS 4 stats lines in rank 0's log
+check resume probe A: PASS cached 0/4096/4096/6144 of 4396/6444/6204/8492 tokens
+check keepalive A: PASS first tokens 35.11 and 70.41 s, 2 and 4 comments, 97510 and 97510 prompt tokens
+check keptcheck A: PASS 8 of 8 answered
+check fillcheck A: PASS 2 of 2 answered
+check memory A: PASS lowest MemAvailable 18/20/20/20 GiB (floor 10)
+check launch B: PASS start-b.log names the pin 4964e38f3509 server, lanes: a forced DSML call's marker is always its token
+check launch B: ZIG_ENV: PASS the launch line names 'TF_DS_WINDOW=25165824'
+check launch B: ZIG_FOLLOW: PASS rank 1's tp4-lane command line names every word of '--pool 25165824'
+check settings B: PASS rank 0 names a 2.0 GiB prompt cache, the shield and the stats line
+check gates B: PASS gates 6 ok=True
+check parallel B: PASS solo 16 replies, burst 16/16, staggered 16/16 == solo, solo 16/16 == as served
+check solo done B: PASS solo done lines 16/16 == as served (sha, rounds, accepted; drafted differs on 0)
+check vision B: PASS vision PASS: vision gate 6/6, visionref 9/9 equal to as served, four at a time 18/18 equal to as served
+check exact chat B: PASS exact chat: 71 of 71 equal
+check shield B: PASS PASS: 14/14 cases (5 clean equal, 9 injected shielded); 14/14 conversations' ids, text and greedy replies == as served
+check sampler B: PASS di_sampler_check: PASS
+check structured B: PASS structured: 11/11 other requests as specified, tool_choice "required" a call (finish tool_calls), burst 12 and staggered 12 of 12 == solo, 12/12 == as served
+check grammar B: PASS rank 0: structured output: xgrammar over 129280 tokens
+check reply ids B: PASS reply ids: 16/16 rows == as served (reasoning, content, calls, finish, tokens)
+check dsml B: PASS di_dsmlreq_check: PASS (16 rows: forced rows call offered tools within their schema, auto rows equal the reference); DSML forced and auto rows: 16/16 rows == as served (reasoning, content, calls, finish, tokens)
+check acceptstats B: PASS di_acceptstats_check: PASS (the depth families add up)
+check stats lines B: PASS 4 stats lines in rank 0's log
+check resume probe B: PASS PASS: replies 4/4 == as served, cached as served 0/4096/4096/6144, candidate 0/4096/4096/6144, as served did not show the near-end case (q ran from 0, q2 resumed 4096): judged on equal replies alone
+check keepalive B: PASS PASS: replies 2/2 == as served, as served 2 and 4 comments, 15.0 and 15.0 s silent before the first token; candidate 2 and 4, 15.1 and 15.0 s, first tokens 35.1/70.4 s as served, 35.1/70.1 s candidate (97510 and 97510 prompt tokens)
+check keptcheck B: PASS keptcheck PASS: replies 8/8 == the served build's, geometry S 2822, image span 186, img1 6267, A 67827 (last chunk end 67584), candidate cached img2 4096, img3 2048, b1 2048, a2 67584 (served 4096, 2048, 2048, 67584)
+check fillcheck B: PASS fillcheck PASS: replies 2/2 == the served build's, Y 65010 tokens; X's longest stop in the wait 23.3 s as served (4 chunks of X), 23.3 s candidate (4), Y's first token 23.4 s as served (lane 23.4), 23.5 s candidate (lane 23.5, +0.1 %)
+check memory B: PASS lowest MemAvailable 11/12/13/13 GiB (floor 10)
+check prefill bench: PASS cmp1021_bench.py prefill 3 on the 93,335-token prompt on A and on B
+prefill 93,335 tokens: A 2548.1 tok/s (median TTFT 36.63 s), B 2551.6 tok/s (median TTFT 36.58 s), B/A +0.1 %
+mem: after the prefill A 18/20/20/20 GiB, B 11/13/13/13 GiB; lowest during it A 18/20/20/20 GiB, B 11/12/13/13 GiB (floor 10)
+cmp1021_knob cmpp25: B PASS (43 checks: B's replies == A's; prefill A 2548.1 tok/s (median TTFT 36.63 s), B 2551.6 tok/s (median TTFT 36.58 s), B/A +0.1 %; lowest MemAvailable A 18/20/20/20 / B 11/12/13/13 GiB)
+check served: pool: PASS rank 1 names pool 25165824
+check served: gates on 18091: PASS gates 6 ok=True
+check served: exact chat on 18091: PASS exact chat: 71 of 71 equal
+check served: memory: PASS lowest MemAvailable 13/14/14/14 GiB on 18091 (floor 10)
+cmp1021_promote cmpp25: served served/dsv41-tp4-20261021-zig-4964e38f-split-shield-structured-dsml-stats-big-kept-kv25m-1017 (gates PASS on 18095 vs the served build: 47 checks, every reply equal; on 18091: pool 25165824, gates 6, exact chat 71/71; lowest MemAvailable B 11/12/13/13, served 13/14/14/14 GiB; prefill exact chat: 71 of 71 equal)
