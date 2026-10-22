@@ -48,6 +48,16 @@ at the fixed draft allowance) and [#34](https://github.com/bertholomus/TensorFol
 drafted stream without its suffix-lookup copy windows). Their three commits keep Blackwellboy as author; the two that
 adapt the pick to the four-node line also name Claude, which made the adaptation. Thank you.
 
+Since v0.3.2 the engine branch also carries [#38](https://github.com/bertholomus/TensorFold/pull/38) by
+[@Blackwellboy](https://github.com/Blackwellboy): a refused Engram row id no longer leaks the AIO batch's buffers.
+The branch cherry-picked it onto the four-node line; the commit keeps Blackwellboy as its author. Thank you.
+
+This recipe's `scripts/serve.sh` and `RUNNING.md` carry two durable fixes from an outside tester's bring-up,
+Niklas Lenz ([niklaslenz.com](https://niklaslenz.com)): his report's 5.2 (a head node with no ssh key for itself)
+and 5.3 (rank 0 opens the vision tower's shard at start, which a folder check missed). The script now runs a node
+that is this host locally and preflights every file rank 0 opens, naming any missing one and starting and
+stopping nothing; `RUNNING.md` section 2 lists the files. Thank you.
+
 Our commits to this recipe, and many of ours to the engine branch, name Claude (Anthropic's AI assistant), which
 helped write them, in a `Co-Authored-By` trailer.
 

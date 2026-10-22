@@ -1,0 +1,82 @@
+[
+ {
+  "kind": "completions",
+  "salt": "s1",
+  "prompt_tokens": 6011,
+  "cached": 0,
+  "want": "zero",
+  "ok": true
+ },
+ {
+  "kind": "completions",
+  "salt": "s2",
+  "prompt_tokens": 6011,
+  "cached": 4096,
+  "want": "zero",
+  "ok": false
+ },
+ {
+  "kind": "completions",
+  "salt": "s1",
+  "prompt_tokens": 6011,
+  "cached": 4096,
+  "want": "some",
+  "ok": true
+ },
+ {
+  "kind": "completions",
+  "salt": null,
+  "prompt_tokens": 6011,
+  "cached": 4096,
+  "want": "zero",
+  "ok": false
+ },
+ {
+  "kind": "completions",
+  "salt": null,
+  "prompt_tokens": 6011,
+  "cached": 4096,
+  "want": "some",
+  "ok": true
+ },
+ {
+  "kind": "chat",
+  "salt": "s1",
+  "prompt_tokens": 6042,
+  "cached": 0,
+  "want": "zero",
+  "ok": true
+ },
+ {
+  "kind": "chat",
+  "salt": "s2",
+  "prompt_tokens": 6042,
+  "cached": 4096,
+  "want": "zero",
+  "ok": false
+ },
+ {
+  "kind": "chat",
+  "salt": "s1",
+  "prompt_tokens": 6042,
+  "cached": 4096,
+  "want": "some",
+  "ok": true
+ },
+ {
+  "kind": "chat",
+  "salt": null,
+  "prompt_tokens": 6042,
+  "cached": 4096,
+  "want": "zero",
+  "ok": false
+ },
+ {
+  "kind": "chat",
+  "salt": null,
+  "prompt_tokens": 6042,
+  "cached": 4096,
+  "want": "some",
+  "ok": true
+ }
+]

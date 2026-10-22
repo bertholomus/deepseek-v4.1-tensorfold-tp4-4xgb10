@@ -4,6 +4,59 @@ Our own measurements of our own engine on four GB10 nodes, as the README's table
 addresses and paths are not in these files; nothing else was changed, except where a section says a file holds only
 a part of a check's output.
 
+## `served-v032/`: v0.3.2, the gate slot's files on the four nodes (2026-10-22)
+
+The README's v0.3.2 rows come from gate run 4 of slot `zsalt` (chain-zsalt). Each launch is a phase: a = the
+  build
+served before it (engine `37df889`, the switches off), b = the TF_FILL_MANY and cache_salt build with both
+  switches
+unset, c-v032 = the build v0.3.2 serves (engine `1935b48a`) with `TF_FILL_CHUNKS=1 TF_FILL_MANY=1` at
+  the
+20,971,520 pool. The gate files below are c-v032's, with a's and b's where a name says so; the kept-state,
+  resume,
+fill and keepalive checks ran in b (a records the served build's), and the served port was re-checked after the
+promotion. Each file is as the slot wrote it, with private host names and paths taken out; a file it names is
+  named
+without its folder.
+
+| File | What |
+|---|---|
+| `result.txt` | the slot's verdicts: a line a phase with each check and the 16 rows against a's, then the
+  promotion |
+| `zsalt.out` | the run's log: the slot's start, each phase's line, `d alone`, the promotion and the served
+  port's re-check |
+| `rows-a/`, `rows-b/`, `rows-v032/`: `rows-1.json` to `rows-7.json` | `rows-1.json` to `rows-6.json`:
+  `kit_bench.py` decode set a (512 tokens) and set b (384 tokens), median of 3; 2 and 4 streams (six reps); 8
+  and 16 streams sustained for 90 s; prefill 8K / 32K / 128K (three reps each). `rows-7.json`: set c, replies
+  that copy code, JSON or quoted text from the prompt (512 tokens, median of 6), from our lane tool |
+| `rows-*/mem.txt` | each node's free memory (MemAvailable, GiB) about every 15 s during the rows, nodes named
+  by rank |
+| `rowcmp-b.log`, `rowcmp-v032.log` | each phase's 16 rows against a's (one decimal), then the verdict |
+| `behind-a.json`, `behind-v032.json` | the time-to-first-token rows: a short chat behind the cold 93,335-token
+  prompt and the long prompt itself, three reps (`summary` holds the medians; the 93,335-token prefill is median
+  93335/ttft_s over the long rows) |
+| `salt-a.json`, `salt-v032.json` | the cache_salt check: ten cases, `want` and `cached` per case; a's is the
+  served build's FAIL record |
+| `gates-b.json`, `gates-v032.json` | `gates.py` (6 API gates) |
+| `exact-chat.json` | the exact-chat check on b: 71 chats against DeepSeek's reference encoding; the served
+  port's re-check is in `zsalt.out` |
+| `parallel-summary.json` | 16 replies as a burst and staggered, against solo |
+| `vision-gate.json`, `visionref.json`, `vision-four-at-a-time.json` | the image gate (6 checks); 9 image
+  prompts' token ids; the same 9 four at a time |
+| `structured.json` | 12 structured requests solo, as a burst and staggered |
+| `dsml.json` | 16 rows of "required", named and "auto" tool calls (eight requests, whole and streamed) |
+| `forced-calls.json` | 36 sampled forced requests: each row's calls, finish and counts of the DSML marker's
+  token |
+| `accept-stats.json` | the draft head's accepted chains by depth, from `/metrics` |
+| `sampler.json` | sampling with `top_k` off and above 56 |
+| `reply-ids.json` | 16 replies that quote the reasoning end or the DSML marker, `TENSORFOLD_REPLY_IDS` unset |
+| `shield.json` | the prompt shield on b: 14 conversations' token ids, with and without spelled special tokens |
+| `keepalive.json` | two streamed 97,510-token prompts at once, on b: each SSE comment's time and text, the
+  longest silence before the first token; the served port's is in `zsalt.out` |
+| `kept-states.json`, `resume.json`, `fill.json` | the kept-state, resume and fill checks, on b |
+| `done-v032.txt`, `start-*.log` | the phase's request log and the three launches' records (the launch lines and
+  flags) |
+
 ## `served-v031/`: v0.3.1, a folder for each session on the four nodes (2026-10-21)
 
 Each of the README's v0.3.1 rows names the session it comes from. The gate runs used the served launch on a second

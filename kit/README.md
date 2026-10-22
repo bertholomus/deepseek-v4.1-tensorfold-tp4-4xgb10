@@ -1,10 +1,11 @@
 # Kernel kit: DeepSeek-V4.1-Flash on TensorFold 1.0 (Zig), four GB10 nodes
 
-This folder is the kit our served four-node lane loads (engine `37df889`, the 1017 weights; v0.3.0's engine `4964e38`
-loaded the same files). `MANIFEST` lists all 362 files with their sizes and sha256. 361 are byte for byte the served
-copies on our four nodes; `aot/aot.json` differs only in its packer's note of where two kernel sets came from, which
-named private folders (the engine does not read the note, and the kernels it lists are the same). Git holds 357 of the
-files (141 MB). The other five are made from public weights instead of committed:
+This folder is the kit our served four-node lane loads (engine `1935b48a`, the 1017 weights; v0.3.1's
+engine `37df889` loaded the same files). `MANIFEST` lists all 362 files with their sizes and sha256. 361 are
+byte for byte the served copies on our four nodes; `aot/aot.json` differs only in its packer's note of where two
+kernel sets came from, which named private folders (the engine does not read the note, and the kernels it lists
+are the same). Git holds 357 of the files (141 MB). The other five are made from public weights instead of
+committed:
 
 - the four RoPE tables `rope-{plain,compressed}-{cos,sin}.f32` (142,606,336 bytes each), which `tools/make_rope.py`
   computes on the CPU from the checkpoint's `config.json`;

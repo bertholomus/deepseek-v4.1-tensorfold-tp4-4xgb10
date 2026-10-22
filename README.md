@@ -36,7 +36,7 @@ What it does:
 - Four-node exact split: on the 2.9 bpw weights of v0.1.1 its replies equal the two-node family's token for token in
   our gates; on the 1017 weights, burst and staggered requests equal the solo replies 16 of 16.
 - Image input in user turns and tool results (the vision tower runs on rank 0), as DeepSeek's encoding places it.
-- Up to 1,048,576 tokens a request, 16 streams sharing a 25,165,824-position window, with kept-prompt reuse: a request
+- Up to 1,048,576 tokens a request, 16 streams sharing a 20,971,520-position window, with kept-prompt reuse: a request
   that repeats a kept prompt's prefix, images included, resumes from it instead of prefilling again.
 - Structured output: `response_format` (a JSON schema or a JSON object), `guided_choice` and `guided_regex` hold a
   reply to its grammar.
@@ -45,6 +45,97 @@ What it does:
 - Exact DSpark speculative decoding: drafted output equals serial output token for token.
 - OpenAI-compatible HTTP API (TensorFold's server): chat and text completions, streaming, reasoning output, tool calls.
 
+## v0.3.2: what changed
+
+| | v0.3.1 | v0.3.2 | Measured in |
+|---|---|---|---|
+| Engine | `a16a167`, on TensorFold 1.0.12 | `51b0c63`, on TensorFold 1.0.12 | |
+| Kernel kit | 362 files | the same 362 files | |
+| The streams' shared window, the KV cache pool (`TF_DS_WINDOW`; the followers' `--pool`) | 25,165,824 positions
+  | 20,971,520 positions (4,194,304 fewer, 16.7 %) | |
+| A short chat behind a cold 93,335-token prefill, time to first token (median of 3) | 35.60 s, the
+  build served before it in the same session | 0.76 s (`TF_FILL_CHUNKS=1 TF_FILL_MANY=1`; the gate is
+  1.9 s) | `zsalt` |
+| The long prompt's time to first token, the same session | 36.54 s | 33.85 s | `zsalt` |
+| Prefill, a 93,335-token prompt (median of 3) | 2,552 tok/s | 2,757 tok/s (+7.9
+  %) | `zsalt` |
+| Decode, one stream, set b: code / prose / structured | 136.7 / 78.6 / 185.3 tok/s | 136.2 / 78.4 / 184.1 tok/s (+0.4 / -0.1 / -1.3
+  %) | `zsalt` |
+| Two / four streams together | 100.8 / 140.9 tok/s | 100.0 / 140.1 tok/s (-0.6 / -0.5 %) | `zsalt` |
+| Eight / sixteen streams sustained for 90 s | 220.8 / 261.7 tok/s | 217.6 / 257.0 tok/s (-0.7 / -1.4 %) | `zsalt` |
+| Prefill, 8,192 / 32,768 / 131,072-token prompts | 2,770 / 2,833 / 2,779 tok/s | 2,789 / 2,938 / 2,944 tok/s (+0.9 / +3.1 / +5.2 %) |
+  `zsalt` |
+| Lowest free memory a node during the speed rows | 11 / 12 / 13 / 13 GiB | 12 / 13 / 14 / 14 GiB | `zsalt` |
+
+Measured in: each row's numbers come from the gate slot its "Measured in" column names, on our four nodes; their
+  raw
+outputs are in `results/served-v032/`. `zsalt` is the gate run of the build v0.3.2 serves (engine
+  `1935b48a`,
+the served settings; run 4 of the slot). In its comparison rows the v0.3.1 column holds v0.3.1's own numbers,
+  from
+the gate run of the build v0.3.1 serves (`z3334`, engine `37df889`); the two time-to-first-token rows and the
+93,335-token prefill row name no v0.3.1 number (v0.3.1 carried no short-chat row), so their v0.3.1 column is the
+build served before it in the same session (`zsalt`'s phase a). Against that build in the same session, v0.3.2's
+build moved its 16 speed rows by -1.4 % (16 streams) to +5.2 % (prefill 128K).
+
+Memory: the smaller window frees memory on every node. At 20,971,520 positions the lane leaves about
+  12 GiB free
+on each Spark: our nodes' lowest free memory was 12 / 13 / 14 / 14 GiB in `zsalt`'s speed rows. Nodes that need
+  more
+room can use 16,777,216 positions (`TF_DS_WINDOW=16777216` and the followers' `--pool 16777216`;
+  `config.env.example`
+says where): in v0.3.1's sessions they left 18 / 20 / 20 / 20 GiB free at the lowest, with every reply equal (README,
+  v0.3.1).
+
+Engine changes since v0.3.1 (the fork's v0.3.2 merge commit lists them):
+
+- `TF_FILL_CHUNKS=1` with `TF_FILL_MANY=1` (both now on as served; `TF_FILL_MANY` was off unless set): a request
+  is
+  admitted while a prompt pass fills, and a pass steps its chunks only while a queued request, another pass, a
+  decoding stream or a cancel waits — a pass alone runs as a whole one. A short chat behind a cold
+  93,335-token
+  prefill answers in 0.76 s (35.60 s for the build served before it, same session); the long prompt's
+  first
+  token came at 33.85 s (36.54 s).
+- cache_salt (engine-side, no flag): a request may carry a salt, and its prompt states are kept and resumed only
+  for
+  that salt, vLLM semantics. A fresh salt caches 0 of a 6,014-token prompt, the same salt 4,096, no salt after a
+  salted one 0 again and no salt after that 4,096 (10 of 10 checks); requests without a salt are as before.
+- The prompt passes run by position: 2,048-row passes below position 8,192 and 4,096 above (`TF_DS_PASS_ROWS`
+  and
+  `TF_DS_PASS_FROM` set the rule; unset as served). The Engram read-ahead is sized by the next pass, so a
+  shorter
+  pass takes rows read ahead that start at it and cover it. The same bits at any rule: a pass ends on the
+  2,048-row
+  resume grid either way.
+- The pool is 25,165,824 → 20,971,520 positions, from free memory (the floor 9 GiB + margin 2 rule on the
+  gate's MiB
+  watch): 12 / 13 / 14 / 14 GiB lowest during the speed rows.
+- TF #38 by @Blackwellboy, cherry-picked (the commit keeps its author): a refused Engram row id no longer leaks
+  the
+  AIO batch's buffers.
+
+Two durable recipe fixes from an outside tester's bring-up (Niklas Lenz, his report's 5.2 and 5.3):
+`scripts/serve.sh` now runs a node that is this host locally — by name, by the name its ssh config gives it, or
+  by
+its address — so no ssh key to itself is needed, and it gained `preflight`, which checks on rank 0's node every
+  file
+rank 0 opens at start (the model folder's small files, each file the index maps a vision tower tensor to — the
+vision tower's shard `model-00041-of-00041.safetensors` —, the node's weight file, the token map, the kit and
+  the
+engine), names any missing one, and starts and stops nothing; `start` runs it first. `RUNNING.md` section 2
+  lists
+the files rank 0 opens.
+
+Off unless set (unset as served): `TF_DS_SOLO_OVERHEAD=1` (pull request #33), `TF_DS_NO_COPIES=1` (pull request
+  #34)
+and `TENSORFOLD_REPLY_IDS=1`, as in v0.3.1.
+
+Thank you to [@Blackwellboy](https://github.com/Blackwellboy) for pull requests #33, #34 and #38, and to Niklas
+  Lenz
+([niklaslenz.com](https://niklaslenz.com)) for the bring-up report behind the two recipe fixes. The engine
+  branch's
+`ATTRIBUTION.md` credits Blackwellboy, and this recipe's `ATTRIBUTION.md` credits both.
 ## v0.3.1: what changed
 
 | | v0.3.0 | v0.3.1 | Measured in |
@@ -202,35 +293,41 @@ Engine changes since v0.1.1 (the fork's v0.2.0 merge commit lists them):
 ## Results
 
 All numbers are ours, measured with our own clients (`kit_bench.py` and the gate tools of the engine branch) on the
-four nodes, on the served launch: engine `37df889`, the 1017 weights, this kit and the served settings below,
-unless a row names another session. `ENGINE_COMMIT` (`a16a167`) merges that engine's source (`f493858`,
+
+four nodes, on the served launch: engine `1935b48a`, the 1017 weights, this kit and the served settings below,
+unless a row names another session. `ENGINE_COMMIT` (`51b0c63`) merges that engine's source (`37b7d26`,
 which builds the same binaries but for nvcc's build ids) into the branch's public line, which adds pull requests #30
 (off unless `TF_DS_NEIGHBOR_RDMA` is set) and #31 (a test and its write-up; see `RUNNING.md`). Greedy decoding,
-thinking off, unless a row says otherwise. `results/served-v031/` and `results/served-v030/` hold the raw outputs, a
-folder for each session (`results/README.md`).
+thinking off, unless a row says otherwise. `results/served-v032/`, `results/served-v031/` and `results/served-v030/`
+hold the raw outputs, a folder for each session (`results/README.md`).
 
 ### Speed
 
 The gate run of the served build (`z3334`):
 
+The gate run of the served build (`zsalt`, phase c-v032):
+
 | Row | Result |
 |---|---|
-| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 136.7 / 78.6 / 185.3 tok/s |
-| Decode, one stream, set a (512 tokens, median of 3): code / prose / structured | 108.1 / 71.3 / 138.5 tok/s |
-| Decode, one stream, set c, replies that copy from the prompt (512 tokens, median of 6): code / JSON / quoted text | 152.0 / 153.8 / 163.3 tok/s |
-| Two streams together (256 tokens each, mean of 6) | 100.8 tok/s aggregate |
-| Four streams together (256 tokens each, mean of 6) | 140.9 tok/s aggregate |
-| Eight streams sustained for 90 s (256 tokens each) | 220.8 tok/s aggregate |
-| Sixteen streams sustained for 90 s (256 tokens each) | 261.7 tok/s aggregate |
-| Prefill, 8,192-token prompt (median of 3) | 2,770 tok/s |
-| Prefill, 32,768-token prompt (median of 3) | 2,833 tok/s |
-| Prefill, 131,072-token prompt (median of 3) | 2,779 tok/s |
-| Lowest free memory a node during these rows | 11 / 12 / 13 / 13 GiB |
+| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 136.2 / 78.4 / 184.1 tok/s |
+| Decode, one stream, set a (512 tokens, median of 3): code / prose / structured | 107.7 / 71.2 / 136.7 tok/s |
+| Decode, one stream, set c, replies that copy from the prompt (512 tokens, median of 6): code / JSON / quoted text | 152.1 / 153.2 / 163.3 tok/s |
+| Two streams together (256 tokens each, mean of 6) | 100.0 tok/s aggregate |
+| Four streams together (256 tokens each, mean of 6) | 140.1 tok/s aggregate |
+| Eight streams sustained for 90 s (256 tokens each) | 217.6 tok/s aggregate |
+| Sixteen streams sustained for 90 s (256 tokens each) | 257.0 tok/s aggregate |
+| Prefill, 8,192-token prompt (median of 3) | 2,789 tok/s |
+| Prefill, 32,768-token prompt (median of 3) | 2,938 tok/s |
+| Prefill, 131,072-token prompt (median of 3) | 2,944 tok/s |
+| Lowest free memory a node during these rows | 12 / 13 / 14 / 14 GiB |
 
 ### Long context and kept prompts
 
 These rows are v0.3.0's, at its 4,194,304-position window. On v0.3.1's build the kept-state, resume, keepalive
-and fill checks gave replies equal to v0.3.0's build's (`z3334`).
+and fill checks gave replies equal to v0.3.0's build's (`z3334`). On v0.3.2's build the gate's kept-state,
+resume and fill checks ran in its phase b (the TF_FILL_MANY and cache_salt build, both switches unset): the
+kept-state replies 8 of 8, the resume probe's 4 of 4 and the fill replies 2 of 2 equal to the build served
+before it's, and the keepalive re-ran on the served port after the promotion, replies 2 of 2 equal (`zsalt`).
 
 | Check | Result |
 |---|---|
@@ -247,23 +344,32 @@ window; their results are in the v0.2.0 README.
 ### Gates
 
 On the gate launch of the served build (`z3334`), and where a line says so, again on the served port after the
-promotion. Every reply these gates compare equals that of v0.3.0's build (engine `4964e38`) in the same session:
+
+promotion and in the slot's earlier phases. Every reply these gates compare equals that of the build served before
+it (v0.3.1's engine `37df889`) in the same session:
 
 - Exact chat: 71 of 71 chats (system and developer prompts, tools and tool calls, tool results, reasoning and its
   effort, multi-turn, response formats) give the same token ids through the server's `/tokenize` as DeepSeek's
   reference encoding (`encoding.py`, MIT) gives for them; 71 of 71 on the served port.
-- The API gates 6 of 6: the model list, a chat probe, a streamed reasoning, a tool call, drafted equals serial, and a
-  burst of four; 6 of 6 on the served port.
-- 16 replies sent as a burst and staggered: equal to their solo replies 16/16 and 16/16.
-- Vision: the image gate 6/6; 9 image prompts' token ids, then the same 9 four at a time, twice:
-  18/18 equal to the solo run.
-- The prompt shield: 14 of 14 cases (in 5 no sender wrote a marker, and they tokenize as before; in
-  9 one did, and the marker stays text); 14 of 14 on the served port.
+- The API gates 6 of 6: the model list, a chat probe, a streamed reasoning, a tool call, drafted equals serial, and
+  a burst of four; 6 of 6 on the served port.
+- 16 replies sent as a burst and staggered: equal to their solo replies 16/16 and 16/16, and the solo replies equal
+  the build served before it's.
+- Vision: the image gate 6/6; 9 image prompts' token ids, then the same 9 four at a time, twice: 18/18 equal to the
+  solo run.
+- The prompt shield: 14 of 14 cases in the slot's phase b (in 5 no sender wrote a marker, and they tokenize as
+  before; in 9 one did, and the marker stays text); 14 of 14 on the served port.
 - Structured output: 11 of 11 requests as asked (a JSON schema, a JSON object, a choice, a regex; greedy, sampled
   and with thinking), burst and staggered equal to solo; 11 of 11 on the served port.
-- Forced tool calls: 16 rows (8 requests, whole and streamed) of "required", named and "auto" calls,
-  the forced ones each an offered tool within its schema and the "auto" ones equal to those of the build served before
-  (`4964e38`), on both ports; and sampled forced requests: 36 of 36 valid, 36 of 36 on the served port.
+- Forced tool calls: 16 rows (8 requests, whole and streamed) of "required", named and "auto" calls, the forced ones
+  each an offered tool within its schema and the "auto" ones equal to those of the build served before it
+  (v0.3.1's engine `37df889`); and sampled forced requests: 36 of 36 valid, 36 of 36 on the served port.
+- cache_salt: 10 of 10 checks. A fresh salt caches 0 of the 6,014-token prompt, the same salt 4,096, no salt after a
+  salted one 0 again and no salt after that 4,096; the build served before it served fresh-salt states to unsalted
+  requests (the slot's phase a).
+- A short chat behind the cold 93,335-token prompt: 0.76 s to the first token (gate 1.9 s), against
+  35.60 s for the build served before it in the same session; the long prompt itself 33.85 s
+  (36.54 s), and the six replies equal.
 
 ### Run-time inputs from the public weights
 
@@ -279,7 +385,9 @@ The weights, their readying and each node's weight file are v0.2.0's: the served
 
 ### Earlier releases
 
-v0.3.0 served engine `4964e38` with a 4,194,304-position window; its tables are in the v0.3.0 README (tag `v0.3.0`)
+v0.3.1 served engine `37df889` with a 25,165,824-position window; its tables are in the v0.3.1 README (tag `v0.3.1`)
+and its raw outputs in `results/served-v031/`. v0.3.0 served engine `4964e38` with a 4,194,304-position window; its
+tables are in the v0.3.0 README (tag `v0.3.0`)
 and its raw outputs in `results/served-v030/`. v0.2.0 served engine `5c97635` on these weights; its tables are in the
 v0.2.0 README (tag `v0.2.0`) and its raw outputs in `results/served-1017/`. v0.1.0 and v0.1.1 served the 2.9 bpw
 weights on engine `ad70f4f` and `5940208`. Their tables are in the v0.1.1 README (tag `v0.1.1`), and their raw outputs
@@ -288,23 +396,28 @@ stay in `results/` (`served-ad70f4f/`, `inputs-5940208/`, `throughput-1ca1c10/`,
 ## The served settings
 
 Rank 0 runs `tensorfold-native serve` with `TF_TP_WORLD=4`; ranks 1-3 run `tf-dsv41-lanes`, which follows it. The
-settings as served: `--context 1048576 --parallel 16` and `--prompt-cache-gib 2` on rank 0, `TF_DS_WINDOW=25165824` (the
-streams' shared positions; the followers' `--pool 25165824`), `TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`,
-`TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`, the measured round costs in `TF_DS_ROUND_MS`,
-`TF_DS_IDX_SPLIT=1`, `TENSORFOLD_PLAIN_SPECIALS=1`, `TENSORFOLD_GRAMMAR_LIB` (the kit's `grammar/libtfgrammar.so`),
-`TENSORFOLD_SSE_KEEPALIVE=15`, `TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side stream, the paced L2 prefetch, Engram
-reads by AIO, and the decode-size exchanges over the RDMA rings. New since v0.3.0: the window (4,194,304 before; nodes
-that need more room can use 16,777,216, see v0.3.1's section). `TF_FILL_CHUNKS`, `TENSORFOLD_REPLY_IDS`,
-`TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES` are unset. The round costs are the table measured on
-the 2.9 bpw weights: they guide how many tokens a round drafts, and drafted output equals serial output, so no reply
-depends on them. `scripts/serve.sh` spells the launch out; `config.env.example` holds the site settings.
+
+settings as served: `--context 1048576 --parallel 16` and `--prompt-cache-gib 2` on rank 0, `TF_DS_WINDOW=20971520`
+(the streams' shared positions; the followers' `--pool 20971520`), `TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`,
+`TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`, the measured round costs in
+`TF_DS_ROUND_MS`, `TF_DS_IDX_SPLIT=1`, `TF_FILL_CHUNKS=1`, `TF_FILL_MANY=1`, `TENSORFOLD_PLAIN_SPECIALS=1`,
+`TENSORFOLD_GRAMMAR_LIB` (the kit's `grammar/libtfgrammar.so`), `TENSORFOLD_SSE_KEEPALIVE=15`,
+`TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side stream, the paced L2 prefetch, Engram reads by AIO, and the
+decode-size exchanges over the RDMA rings. New since v0.3.1: `TF_FILL_MANY` with `TF_FILL_CHUNKS` (a request
+admitted while a prompt pass fills; a pass alone runs as a whole one), cache_salt (engine-side, no flag), and the
+prompt passes by position — 2,048-row passes below position 8,192 and 4,096 above, `TF_DS_PASS_ROWS` and
+`TF_DS_PASS_FROM` unset (the window 20,971,520, 25,165,824 before; nodes that need more room can use 16,777,216,
+see v0.3.2's section). `TENSORFOLD_REPLY_IDS`, `TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES`
+are unset. The round costs are the table measured on the 2.9 bpw weights: they guide how many tokens a round
+drafts, and drafted output equals serial output, so no reply depends on them. `scripts/serve.sh` spells the launch
+out; `config.env.example` holds the site settings.
 
 ## Requirements
 
 - Four NVIDIA GB10 nodes on one RoCE network, each with the NVIDIA PyTorch container `nvcr.io/nvidia/pytorch:26.07-py3`
   (Pillow 12.3.0 inside it decodes the image formats other than PNG).
-- Memory: the served window leaves about 10 GiB free on each node; nodes that need more room can use the
-  16,777,216-position window (see v0.3.1's section).
+- Memory: the served window leaves about 12 GiB free on each node; nodes that need more room can use the
+  16,777,216-position window (see v0.3.2's section).
 - The weights: [bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw](https://huggingface.co/bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw)
   (about 275 GB), readied by `tools/serving_1017.py`, and the original checkpoint's shards 47 and 48 for the Engram
   tables, on every node.
