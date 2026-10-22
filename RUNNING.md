@@ -78,13 +78,27 @@ as a fatbin for sm_121; without `TF_DS_RDMA_KERNELS` the engine uses its embedde
   which also holds the whole kit as a download; `verify_kit.sh` refuses any other file. The file v0.1.1 used comes
   from DeepSeek-V4.1-Flash and does not match. Copy the checked `kit/` to `KIT_DIR` on every node. A vision
   checkpoint's server refuses to start without `vision/`.
+- What rank 0 opens at start. Rank 0 reads its weights from its weight file, but it also opens these, so its node needs
+  them even when the other model shards are not there:
+  - in `MODEL_DIR`: `config.json`, `tokenizer.json`, `tokenizer_config.json`, `chat_template.jinja` (from
+    `tools/serving_1017.py`), `model.safetensors.index.json`, and the vision tower's shard,
+    `model-00041-of-00041.safetensors` (266 tensors: `vision.*`, `aligner.*`, `image_start`, `image_newline`,
+    `image_end`; the server loads the tower at start);
+  - in `CACHE_DIR`: `rank-cache/rank0of4-<hash>.bin` and `dsv41_token_map.json`;
+  - in `KIT_DIR`: the kit (`aot/aot.json` and the rest of it); in `ENGINE_DIR`: `tensorfold-native` and
+    `rdma_gather.fatbin`; `ENGRAM_DIR`.
+
+  `scripts/serve.sh start` checks these on rank 0's node first and, when one is missing, names it and starts
+  nothing (it does not stop a running lane either). `scripts/serve.sh preflight` runs the check alone. It finds the
+  vision shard through the index, so it also works with another shard layout.
 
 ## 3. Serve
 
 ```sh
 cp config.env.example config.env     # fill in every <PLACEHOLDER>
+scripts/serve.sh preflight           # exit 0 when every file rank 0 opens at start is there (section 2)
 scripts/serve.sh print               # what start will run on each node
-scripts/serve.sh start               # ranks 3, 2, 1, then rank 0; waits for /v1/models, then a 4-token chat
+scripts/serve.sh start               # preflight, then ranks 3, 2, 1, then rank 0; /v1/models, then a 4-token chat
 scripts/serve.sh check
 scripts/serve.sh stop
 ```
