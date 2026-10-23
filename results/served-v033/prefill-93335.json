@@ -1,0 +1,8 @@
+{
+ "mode": "prefill",
+ "reps": 3,
+ "url": "http://127.0.0.1:18091",
+ "body": "FOLDER",
+ "median_prefill_tok_s": 2949.432488840194,
+ "median_ttft_s": 31.64507082401542
+}

@@ -1,0 +1,65 @@
+{
+ "summary": {
+  "runs": 3,
+  "seconds": [
+   98.31,
+   98.65,
+   98.79
+  ],
+  "median_s": 98.65,
+  "max_s": 98.79,
+  "all_found": true,
+  "all_cold": true,
+  "win": false
+ },
+ "rows": [
+  {
+   "run": 1,
+   "seed": 101,
+   "haystack_tokens": 299817,
+   "prompt_tokens": 299865,
+   "cached_tokens": 0,
+   "cold": true,
+   "found": 3,
+   "phrases": [
+    "nimbus-raven-4190",
+    "meadow-juniper-8653",
+    "amber-orchid-9249"
+   ],
+   "reply": "A: nimbus-raven-4190\nB: meadow-juniper-8653\nC: amber-orchid-9249",
+   "seconds": 98.31
+  },
+  {
+   "run": 2,
+   "seed": 102,
+   "haystack_tokens": 299817,
+   "prompt_tokens": 299865,
+   "cached_tokens": 0,
+   "cold": true,
+   "found": 3,
+   "phrases": [
+    "falcon-orchid-6869",
+    "falcon-meadow-3989",
+    "kestrel-harbor-8030"
+   ],
+   "reply": "A: falcon-orchid-6869\nB: falcon-meadow-3989\nC: kestrel-harbor-8030",
+   "seconds": 98.65
+  },
+  {
+   "run": 3,
+   "seed": 103,
+   "haystack_tokens": 299817,
+   "prompt_tokens": 299865,
+   "cached_tokens": 0,
+   "cold": true,
+   "found": 3,
+   "phrases": [
+    "pepper-lantern-4520",
+    "pepper-cobalt-2997",
+    "orchid-kestrel-8555"
+   ],
+   "reply": "A: pepper-lantern-4520\nB: pepper-cobalt-2997\nC: orchid-kestrel-8555",
+   "seconds": 98.79
+  }
+ ]
+}

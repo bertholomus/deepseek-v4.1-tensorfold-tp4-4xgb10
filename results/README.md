@@ -4,6 +4,68 @@ Our own measurements of our own engine on four GB10 nodes, as the README's table
 addresses and paths are not in these files; nothing else was changed, except where a section says a file holds only
 a part of a check's output.
 
+## `served-v033/`: v0.3.3, the gate slot's files on the four nodes (2026-10-22)
+
+The README's v0.3.3 rows come from slot `zyx` (chain-zyx). Each launch is a phase: a = the build served before
+  it
+  (engine
+`1935b48a`, the settings off), b = the candidate `39155041` with `TF_DS_2D_YX` and
+  `NCCL_NCHANNELS_PER_NET_PEER`
+unset, c-v033 = the build v0.3.3 serves (engine `39155041`) with `TF_DS_2D_YX=1
+  NCCL_NCHANNELS_PER_NET_PEER=8`
+at the 20,971,520 pool. The gate files below are c-v033's, with a's and b's where a name says so; the kept-
+  state,
+  resume,
+fill and keepalive checks ran in b (a records the served build's), and the served port was re-checked after the
+promotion. The 300K needle and the 93,335-token prefill ran on the served build after the promotion (client-
+  only;
+  `needle300k.json`, `prefill-93335.json`; v0.3.2's needle run is in the project's PROGRESS.md). Each file is as
+  the slot
+wrote it, with private host names and paths taken out; a file it names is named without its folder.
+
+| File | What |
+|---|---|
+| `result.txt` | the slot's verdicts: a line a phase with each check and the 16 rows against a's, then the
+  promotion |
+| `zyx.out` | the run's log: each phase's line, the promotion and the served port's re-check |
+| `rows-a/`, `rows-b/`, `rows-v033/`: `rows-1.json` to `rows-7.json` | `rows-1.json` to `rows-6.json`:
+  `kit_bench.py` decode set a (512 tokens) and set b (384 tokens), median of 3; 2 and 4 streams (six reps); 8
+  and 16 streams sustained for 90 s; prefill 8K / 32K / 128K (three reps each). `rows-7.json`: set c, replies
+  that copy code, JSON or quoted text from the prompt (512 tokens, median of 6), from our lane tool |
+| `rows-*/mem.txt` | each node's free memory (MemAvailable, GiB) about every 15 s during the rows, nodes named
+  by rank |
+| `rowcmp-b.log`, `rowcmp-v033.log` | each phase's 16 rows against a's (one decimal), then the verdict |
+| `behind-a.json`, `behind-v033.json` | the time-to-first-token rows: a short chat behind the cold 93,335-token
+  prompt and the long prompt itself, three reps (`summary` holds the medians; the 93,335-token prefill derived
+  from them is median 93335/ttft_s over the long rows) |
+| `salt-a.json`, `salt-v033.json` | the cache_salt check: ten cases, `want` and `cached` per case; a's is the
+  served build's record (not gated) |
+| `gates-v033.json`, `gates-served.json` | `gates.py` (6 API gates), the candidate's and the served port's after
+  the promotion |
+| `exact-chat.json` | the exact-chat check on the served port after the promotion: 71 chats against DeepSeek's
+  reference encoding |
+| `parallel-summary.json` | 16 replies as a burst and staggered, against solo |
+| `vision-gate.json`, `visionref.json`, `vision-four-at-a-time.json` | the image gate (6 checks); 9 image
+  prompts' token ids; the same 9 four at a time |
+| `structured.json` | 12 structured requests solo, as a burst and staggered |
+| `dsml.json` | 16 rows of "required", named and "auto" tool calls (eight requests, whole and streamed) |
+| `forced-calls.json` | 36 sampled forced requests: each row's calls, finish and counts of the DSML marker's
+  token |
+| `accept-stats.json` | the draft head's accepted chains by depth, from `/metrics` |
+| `sampler.json` | sampling with `top_k` off and above 56 |
+| `reply-ids.json` | 16 replies that quote the reasoning end or the DSML marker, `TENSORFOLD_REPLY_IDS` unset |
+| `shield.json` | the prompt shield on b: 14 conversations' token ids, with and without spelled special tokens;
+  the served port's is in `zyx.out` |
+| `keepalive.json` | two streamed 97,510-token prompts at once, on b: each SSE comment's time and text, the
+  longest silence before the first token; the served port's is in `zyx.out` |
+| `kept-states.json`, `resume.json`, `fill.json` | the kept-state, resume and fill checks, on b |
+| `needle300k.json` | the 300K needle on the served build: three runs (seeds 101-103), each 3 of 3 needles
+  found, cached 0 |
+| `prefill-93335.json` | the 93,335-token prefill on the served build: `cmp1021_bench.py prefill 3`, three reps
+  and the median |
+| `done-v033.txt`, `start-*.log` | the phase's request log and the three launches' records (the launch lines and
+  flags) |
+
 ## `served-v032/`: v0.3.2, the gate slot's files on the four nodes (2026-10-22)
 
 The README's v0.3.2 rows come from gate run 4 of slot `zsalt` (chain-zsalt). Each launch is a phase: a = the

@@ -45,6 +45,92 @@ What it does:
 - Exact DSpark speculative decoding: drafted output equals serial output token for token.
 - OpenAI-compatible HTTP API (TensorFold's server): chat and text completions, streaming, reasoning output, tool calls.
 
+## v0.3.3: what changed
+
+| | v0.3.2 | v0.3.3 | Measured in |
+|---|---|---|---|
+| Engine | `51b0c63`, on TensorFold 1.0.12 | `b116c47`, on TensorFold 1.0.12 | |
+| Kernel kit | 362 files | the same 362 files | |
+| The streams' shared window, the KV cache pool (`TF_DS_WINDOW`; the followers' `--pool`) | 20,971,520 positions
+  | the same 20,971,520 positions | |
+| A short chat behind a cold 93,335-token prefill, time to first token (median of 3) | 0.76 s (the gate was 1.9
+  s) | 0.68 s (the gate is 0.89 s) | `zyx` |
+| The long prompt's time to first token, the same session | 34.04 s | 32.00 s | `zyx` |
+| Prefill, a 93,335-token prompt (median of 3, `cmp1021_bench.py`) | 2,742 tok/s, derived from the long-prompt
+  rows (the gate ran no 93,335-token prefill bench on it) | 2,949 tok/s | `row34` |
+| Decode, one stream, set b: code / prose / structured | 135.8 / 78.3 / 183.7 tok/s | 135.6 / 78.6 / 183.7 tok/s
+  (level) | `zyx` |
+| Two / four streams together | 100.6 / 140.3 tok/s | 100.4 / 139.9 tok/s (-0.2 / -0.3 %) | `zyx` |
+| Eight / sixteen streams sustained for 90 s | 216.7 / 256.5 tok/s | 217.6 / 255.6 tok/s (+0.4 / -0.4 %) | `zyx`
+  |
+| Prefill, 8,192 / 32,768 / 131,072-token prompts | 2,767 / 2,915 / 2,920 tok/s | 2,974 / 3,107 / 3,140 tok/s
+  (+7.5 / +6.6 / +7.5 %) | `zyx` |
+| Lowest free memory a node during the speed rows | 11 / 13 / 13 / 13 GiB | 11 / 13 / 13 / 14 GiB | `zyx` |
+
+Measured in: each row's numbers come from the gate slot its "Measured in" column names, on our four nodes; their
+  raw
+outputs are in `results/served-v033/`. `zyx` is the gate run of the build v0.3.3 serves (engine `39155041`,
+the served settings; the slot's phase c-v033). In its comparison rows the v0.3.2 column holds the build served
+  before
+it's, measured in the same session (`zyx`'s phase a). Against that build in the same session, v0.3.3's build
+  moved
+  its
+16 speed rows by -0.4 % (set a prose) to +7.5 % (prefill 128K); the decode rows moved
+  -0.2 / +0.3 / 0.0 %, inside the run-to-run spread — decode is unchanged.
+
+The 93,335-token prefill row: v0.3.3's 2,949 tok/s is the median of three runs of `cmp1021_bench.py prefill 3`
+  on
+the 93,335-token prompt on the served build, client-only on the served port after the promotion (its time to
+  first
+  token 31.65 s; `row34`). v0.3.1's README row, 2,552 tok/s, is the same bench on the same prompt
+  (`cmpp25`): **++15.6 % since v0.3.1**. The same session's build served before it read 2,917 tok/s,
+  derived from its three long-prompt time-to-first-token rows (the gate ran no 93,335-token prefill bench in the
+  slot; +6.4 % against v0.3.3's bench number, and the 8,192 / 32,768 / 131,072-token rows above are
+  the like-for-like session comparison). v0.3.2's own README row was 2,757 tok/s, derived the same way in its
+  slot.
+
+Against v0.3.1's README rows (its gate run `z3334`, engine `37df889`): the 93,335-token prefill 2,552 →
+  2,949 tok/s (++15.6 %, the same bench both times); prefill 8,192 / 32,768 / 131,072 tokens
+  2,770 / 2,833 / 2,779 → 2,974 / 3,107 / 3,140 tok/s (+7.3 / +9.7 / +13.0 %, the same row method both slots);
+  set b's decode
+  136.7 / 78.6 / 185.3 → 135.6 / 78.6 / 183.7 tok/s (-0.8 / 0.0 / -0.9 %, level — decode is unchanged since
+  v0.3.1). The 300K
+  needle: three runs (seeds 101, 102, 103) of a 299,865-token prompt with 3 needles each, cached 0 every
+  run, all 3 found in every run, 98.65 s median against v0.3.2's 106.59 s on the same check
+  (-7.4 % time; `row34`).
+
+Memory: the window is v0.3.2's 20,971,520 positions and stays there; the nodes' lowest free memory in `zyx`'s
+  speed
+  rows was 11 / 13 / 13 / 14 GiB (the floor is 9 GiB).
+
+Engine changes since v0.3.2 (one commit; the fork's v0.3.3 commit is it):
+
+- `TF_DS_2D_YX=1` with `NCCL_NCHANNELS_PER_NET_PEER=8` (both now on as served; `TF_DS_2D_YX` was off unless
+  set):
+  the prompt's cross-rank gathers carried the four fp32 quarters of the sublayer partials, and the posting
+  kernels
+  take only their pair-summed bf16 y from them. With the switch on, the pair partners swap their fp32 partials
+  of
+  each half of the rows, sum their own half in rank order, and the four nodes all-gather the bf16 halves: a node
+  receives 5 n·w bytes instead of 12 n·w, and the quarters copies become one widen. The gathered values are the
+  same bits (an unused gather slot holds -0.0, which the kernels read as before), so the GPU kernels are
+  unchanged.
+  The pair swap runs on eight NCCL channels per peer (the default is one or two); without the channels the
+  gathers
+  alone bought nothing (+0.1 % on the 93,335-token prompt, `pnc`), and with them that prompt read 2,921 tok/s
+  (+6.1 %, `pnc`) before the gate's final rows above.
+- The 300K needle run above is a measurement, not an engine change.
+
+Off unless set (unset as served): `TF_DS_SOLO_OVERHEAD=1` (pull request #33), `TF_DS_NO_COPIES=1` (pull request
+  #34), `TENSORFOLD_REPLY_IDS=1` and `TF_DS_PASS_ROWS` / `TF_DS_PASS_FROM` (the prompt-pass rule at its default:
+  2,048-row passes below position 8,192 and 4,096 above), as in v0.3.2.
+
+Thank you to [@Blackwellboy](https://github.com/Blackwellboy) for pull requests #33, #34 and #38 and to Niklas
+  Lenz
+  ([niklaslenz.com](https://niklaslenz.com)) for the bring-up report behind v0.3.2's two recipe fixes, as in
+  v0.3.2. v0.3.3 adds no pull request; the engine branch's `ATTRIBUTION.md` and this recipe's `ATTRIBUTION.md`
+  are
+  unchanged.
 ## v0.3.2: what changed
 
 | | v0.3.1 | v0.3.2 | Measured in |
@@ -294,40 +380,44 @@ Engine changes since v0.1.1 (the fork's v0.2.0 merge commit lists them):
 
 All numbers are ours, measured with our own clients (`kit_bench.py` and the gate tools of the engine branch) on the
 
-four nodes, on the served launch: engine `1935b48a`, the 1017 weights, this kit and the served settings below,
-unless a row names another session. `ENGINE_COMMIT` (`51b0c63`) merges that engine's source (`37b7d26`,
-which builds the same binaries but for nvcc's build ids) into the branch's public line, which adds pull requests #30
+four nodes, on the served launch: engine `39155041`, the 1017 weights, this kit and the served settings below,
+unless a row names another session. `ENGINE_COMMIT` (`b116c47`) is that engine's source (`39155041`,
+which builds the same binaries but for nvcc's build ids) on the branch's public line, which adds pull requests #30
 (off unless `TF_DS_NEIGHBOR_RDMA` is set) and #31 (a test and its write-up; see `RUNNING.md`). Greedy decoding,
-thinking off, unless a row says otherwise. `results/served-v032/`, `results/served-v031/` and `results/served-v030/`
+thinking off, unless a row says otherwise. `results/served-v033/`, `results/served-v032/` and `results/served-v031/`
 hold the raw outputs, a folder for each session (`results/README.md`).
 
 ### Speed
 
 The gate run of the served build (`z3334`):
 
-The gate run of the served build (`zsalt`, phase c-v032):
+The gate run of the served build (`zyx`, phase c-v033):
 
 | Row | Result |
 |---|---|
-| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 136.2 / 78.4 / 184.1 tok/s |
-| Decode, one stream, set a (512 tokens, median of 3): code / prose / structured | 107.7 / 71.2 / 136.7 tok/s |
-| Decode, one stream, set c, replies that copy from the prompt (512 tokens, median of 6): code / JSON / quoted text | 152.1 / 153.2 / 163.3 tok/s |
-| Two streams together (256 tokens each, mean of 6) | 100.0 tok/s aggregate |
-| Four streams together (256 tokens each, mean of 6) | 140.1 tok/s aggregate |
+| Decode, one stream, set b (384 tokens, median of 3): code / prose / structured | 135.6 / 78.6 / 183.7 tok/s |
+| Decode, one stream, set a (512 tokens, median of 3): code / prose / structured | 107.6 / 70.9 / 138.5 tok/s |
+| Decode, one stream, set c, replies that copy from the prompt (512 tokens, median of 6): code / JSON / quoted text | 151.8 / 152.4 / 163.2 tok/s |
+| Two streams together (256 tokens each, mean of 6) | 100.4 tok/s aggregate |
+| Four streams together (256 tokens each, mean of 6) | 139.9 tok/s aggregate |
 | Eight streams sustained for 90 s (256 tokens each) | 217.6 tok/s aggregate |
-| Sixteen streams sustained for 90 s (256 tokens each) | 257.0 tok/s aggregate |
-| Prefill, 8,192-token prompt (median of 3) | 2,789 tok/s |
-| Prefill, 32,768-token prompt (median of 3) | 2,938 tok/s |
-| Prefill, 131,072-token prompt (median of 3) | 2,944 tok/s |
-| Lowest free memory a node during these rows | 12 / 13 / 14 / 14 GiB |
+| Sixteen streams sustained for 90 s (256 tokens each) | 255.6 tok/s aggregate |
+| Prefill, 8,192-token prompt (median of 3) | 2,974 tok/s |
+| Prefill, 32,768-token prompt (median of 3) | 3,107 tok/s |
+| Prefill, 131,072-token prompt (median of 3) | 3,140 tok/s |
+| Lowest free memory a node during these rows | 11 / 13 / 13 / 14 GiB |
 
 ### Long context and kept prompts
 
 These rows are v0.3.0's, at its 4,194,304-position window. On v0.3.1's build the kept-state, resume, keepalive
-and fill checks gave replies equal to v0.3.0's build's (`z3334`). On v0.3.2's build the gate's kept-state,
-resume and fill checks ran in its phase b (the TF_FILL_MANY and cache_salt build, both switches unset): the
-kept-state replies 8 of 8, the resume probe's 4 of 4 and the fill replies 2 of 2 equal to the build served
-before it's, and the keepalive re-ran on the served port after the promotion, replies 2 of 2 equal (`zsalt`).
+and fill checks gave replies equal to v0.3.0's build's (`z3334`). On v0.3.2's build they ran in its gate's
+phase b and equaled the build served before it's (`zsalt`). On v0.3.3's build they ran in its gate's phase b
+(the candidate with both settings unset): the kept-state replies 8 of 8, the resume probe's 4 of 4 and the
+fill replies 2 of 2 equal to the build served before it's, and the keepalive re-ran on the served port after
+the promotion, replies 2 of 2 equal (`zyx`). The 300K needle ran on the served build after the promotion
+(`row34`): 3 of 3 needles found in each of three runs, median 98.65 s. The 999,843-token needle
+check still has not run on the served settings, as in v0.3.1 and v0.3.2 (the README keeps v0.2.0's needle
+record and says what it ran on).
 
 | Check | Result |
 |---|---|
@@ -346,11 +436,11 @@ window; their results are in the v0.2.0 README.
 On the gate launch of the served build (`z3334`), and where a line says so, again on the served port after the
 
 promotion and in the slot's earlier phases. Every reply these gates compare equals that of the build served before
-it (v0.3.1's engine `37df889`) in the same session:
+it (v0.3.2's engine `1935b48a`) in the same session:
 
 - Exact chat: 71 of 71 chats (system and developer prompts, tools and tool calls, tool results, reasoning and its
   effort, multi-turn, response formats) give the same token ids through the server's `/tokenize` as DeepSeek's
-  reference encoding (`encoding.py`, MIT) gives for them; 71 of 71 on the served port.
+  reference encoding (`encoding.py`, MIT) gives for them; 71 of 71 on the served port after the promotion.
 - The API gates 6 of 6: the model list, a chat probe, a streamed reasoning, a tool call, drafted equals serial, and
   a burst of four; 6 of 6 on the served port.
 - 16 replies sent as a burst and staggered: equal to their solo replies 16/16 and 16/16, and the solo replies equal
@@ -363,13 +453,12 @@ it (v0.3.1's engine `37df889`) in the same session:
   and with thinking), burst and staggered equal to solo; 11 of 11 on the served port.
 - Forced tool calls: 16 rows (8 requests, whole and streamed) of "required", named and "auto" calls, the forced ones
   each an offered tool within its schema and the "auto" ones equal to those of the build served before it
-  (v0.3.1's engine `37df889`); and sampled forced requests: 36 of 36 valid, 36 of 36 on the served port.
-- cache_salt: 10 of 10 checks. A fresh salt caches 0 of the 6,014-token prompt, the same salt 4,096, no salt after a
-  salted one 0 again and no salt after that 4,096; the build served before it served fresh-salt states to unsalted
-  requests (the slot's phase a).
-- A short chat behind the cold 93,335-token prompt: 0.76 s to the first token (gate 1.9 s), against
-  35.60 s for the build served before it in the same session; the long prompt itself 33.85 s
-  (36.54 s), and the six replies equal.
+  (v0.3.2's engine `1935b48a`); and sampled forced requests: 36 of 36 valid, 36 of 36 on the served port.
+- cache_salt: 10 of 10 checks. A fresh salt caches 0 of the 6,012-token prompt, the same salt 4,096, no salt after a
+  salted one 0 again and no salt after that 4,096 (the completions and the chat forms both).
+- A short chat behind the cold 93,335-token prompt: 0.68 s to the first token (gate 0.89 s),
+  against 0.76 s for the build served before it in the same session; the long prompt itself
+  32.00 s (34.04 s), and the six replies equal.
 
 ### Run-time inputs from the public weights
 
@@ -385,7 +474,10 @@ The weights, their readying and each node's weight file are v0.2.0's: the served
 
 ### Earlier releases
 
-v0.3.1 served engine `37df889` with a 25,165,824-position window; its tables are in the v0.3.1 README (tag `v0.3.1`)
+v0.3.2 served engine `1935b48a` with a 20,971,520-position window; its tables are in the v0.3.2 README (tag
+`v0.3.2`)
+and its raw outputs in `results/served-v032/`. v0.3.1 served engine `37df889` with a 25,165,824-position
+window; its tables are in the v0.3.1 README (tag `v0.3.1`)
 and its raw outputs in `results/served-v031/`. v0.3.0 served engine `4964e38` with a 4,194,304-position window; its
 tables are in the v0.3.0 README (tag `v0.3.0`)
 and its raw outputs in `results/served-v030/`. v0.2.0 served engine `5c97635` on these weights; its tables are in the
@@ -400,17 +492,20 @@ Rank 0 runs `tensorfold-native serve` with `TF_TP_WORLD=4`; ranks 1-3 run `tf-ds
 settings as served: `--context 1048576 --parallel 16` and `--prompt-cache-gib 2` on rank 0, `TF_DS_WINDOW=20971520`
 (the streams' shared positions; the followers' `--pool 20971520`), `TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`,
 `TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`, the measured round costs in
-`TF_DS_ROUND_MS`, `TF_DS_IDX_SPLIT=1`, `TF_FILL_CHUNKS=1`, `TF_FILL_MANY=1`, `TENSORFOLD_PLAIN_SPECIALS=1`,
-`TENSORFOLD_GRAMMAR_LIB` (the kit's `grammar/libtfgrammar.so`), `TENSORFOLD_SSE_KEEPALIVE=15`,
-`TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side stream, the paced L2 prefetch, Engram reads by AIO, and the
-decode-size exchanges over the RDMA rings. New since v0.3.1: `TF_FILL_MANY` with `TF_FILL_CHUNKS` (a request
-admitted while a prompt pass fills; a pass alone runs as a whole one), cache_salt (engine-side, no flag), and the
-prompt passes by position — 2,048-row passes below position 8,192 and 4,096 above, `TF_DS_PASS_ROWS` and
-`TF_DS_PASS_FROM` unset (the window 20,971,520, 25,165,824 before; nodes that need more room can use 16,777,216,
-see v0.3.2's section). `TENSORFOLD_REPLY_IDS`, `TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES`
-are unset. The round costs are the table measured on the 2.9 bpw weights: they guide how many tokens a round
-drafts, and drafted output equals serial output, so no reply depends on them. `scripts/serve.sh` spells the launch
-out; `config.env.example` holds the site settings.
+`TF_DS_ROUND_MS`, `TF_DS_IDX_SPLIT=1`, `TF_FILL_CHUNKS=1`, `TF_FILL_MANY=1`, `TF_DS_2D_YX=1`,
+`NCCL_NCHANNELS_PER_NET_PEER=8`, `TENSORFOLD_PLAIN_SPECIALS=1`, `TENSORFOLD_GRAMMAR_LIB` (the kit's
+`grammar/libtfgrammar.so`), `TENSORFOLD_SSE_KEEPALIVE=15`, `TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side
+stream, the paced L2 prefetch, Engram reads by AIO, and the decode-size exchanges over the RDMA rings. New since
+v0.3.1: `TF_FILL_MANY` with `TF_FILL_CHUNKS` (a request admitted while a prompt pass fills; a pass alone runs as a
+whole one), cache_salt (engine-side, no flag), the prompt passes by position, and the 20,971,520-position window
+(25,165,824 before; nodes that need more room can use 16,777,216, see v0.3.2's section). New since v0.3.2:
+`TF_DS_2D_YX=1` with `NCCL_NCHANNELS_PER_NET_PEER=8` (the prompt's cross-rank gathers carry the pair-summed bf16 y
+instead of the four fp32 quarters, and the ring's send/recv pairs run on eight channels a peer).
+`TENSORFOLD_REPLY_IDS`, `TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES` are unset.
+`TF_DS_PASS_ROWS` and `TF_DS_PASS_FROM` are unset (the pass rule at its default). The round costs are the table
+measured on the 2.9 bpw weights: they guide how many tokens a round drafts, and drafted output equals serial
+output, so no reply depends on them. `scripts/serve.sh` spells the launch out; `config.env.example` holds the site
+settings.
 
 ## Requirements
 

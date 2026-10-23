@@ -1,0 +1,136 @@
+{
+ "cmd": "copyrow",
+ "tokens": 512,
+ "reps": 6,
+ "result": [
+  {
+   "set": "c",
+   "prompt": "copy-code",
+   "max_tokens": 512,
+   "reps": 6,
+   "decode_tps_median": 151.74605990235295,
+   "decode_tps_all": [
+    151.763,
+    150.677,
+    152.773,
+    151.172,
+    152.373,
+    151.729
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512,
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    92,
+    92,
+    92,
+    92,
+    92,
+    92
+   ],
+   "prompt_tokens": 2143,
+   "ttft_s_median": 1.067343453032663,
+   "sha_all": [
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92",
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92",
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92",
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92",
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92",
+    "ee3936827a6d102921eef35940231b3991b428406e5df55da72715cd91366d92"
+   ],
+   "identical_texts": true,
+   "sample": "```python\n\"\"\"Small helpers for a batch pipeline.\"\"\"\n\nfrom __future__ import annotations\n\n\ndef loadCacheBucket(items: list[int], limit: int = 8) -> list[int]:\n    \"\"\"Load the cache values into the bucket, keeping at most limit of them.\"\"\"\n    kept = []\n    for value in items:\n        if value % 2 == 0:\n            kept.append(value * 1 + 0)\n        if len(kept) >= limit:\n            break\n    retur"
+  },
+  {
+   "set": "c",
+   "prompt": "copy-json",
+   "max_tokens": 512,
+   "reps": 6,
+   "decode_tps_median": 152.86430509893233,
+   "decode_tps_all": [
+    152.671,
+    153.935,
+    152.614,
+    153.058,
+    150.559,
+    153.171
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512,
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    92,
+    92,
+    92,
+    92,
+    92,
+    92
+   ],
+   "prompt_tokens": 1824,
+   "ttft_s_median": 0.8516740609775297,
+   "sha_all": [
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a",
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a",
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a",
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a",
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a",
+    "3494bf935e1c889cc384d3aeec86348e18c2fcc2b55e0f8e8d6ac7c242a0e74a"
+   ],
+   "identical_texts": true,
+   "sample": "[\n  {\n    \"id\": 1000,\n    \"name\": \"quiet cache\",\n    \"category\": \"harbor\",\n    \"price\": 4.95,\n    \"stock\": 0\n  },\n  {\n    \"id\": 1001,\n    \"name\": \"amber bucket\",\n    \"category\": \"valley\",\n    \"price\": 6.88,\n    \"stock\": 37\n  },\n  {\n    \"id\": 1002,\n    \"name\": \"narrow buffer\",\n    \"category\": \"station\",\n    \"price\": 8.8,\n    \"stock\": 74\n  },\n  {\n    \"id\": 1003,\n    \"name\": \"steady tensor\",\n    \"cat"
+  },
+  {
+   "set": "c",
+   "prompt": "quote",
+   "max_tokens": 512,
+   "reps": 6,
+   "decode_tps_median": 162.88581053615758,
+   "decode_tps_all": [
+    164.391,
+    163.2,
+    162.572,
+    164.492,
+    162.452,
+    161.983
+   ],
+   "tokens_all": [
+    512,
+    512,
+    512,
+    512,
+    512,
+    512
+   ],
+   "chunks_all": [
+    88,
+    88,
+    88,
+    88,
+    88,
+    88
+   ],
+   "prompt_tokens": 1075,
+   "ttft_s_median": 0.6319086999865249,
+   "sha_all": [
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0",
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0",
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0",
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0",
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0",
+    "2034012e5dc5d9ed1e65fb368ddefbc57c813ba17d1dbdfbbc2eac4ef24ec7c0"
+   ],
+   "identical_texts": true,
+   "sample": "In the quiet hours before dawn the keeper of the station would count the queue by hand, and the record of that work, line 1, still reads the same today. In the amber hours before dawn the keeper of the lighthouse would render the router by hand, and the record of that work, line 2, still reads the same today. In the narrow hours before dawn the keeper of the market would split the index by hand, a"
+  }
+ ]
+}
