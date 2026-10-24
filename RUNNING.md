@@ -1,16 +1,16 @@
 # Running it
 
 What follows is how we run the served build. `scripts/serve.sh` is our served launch with the site values moved to
-`config.env`; nothing else in it changed but its `inputs` command, which the launch never runs. v0.3.3 changes the
+`config.env`; nothing else in it changed but its `inputs` command, which the launch never runs. v0.3.5 changes the
 served settings (section 3); the kit is v0.3.0's, and the weights and how they are readied are v0.2.0's.
 
 ## 1. The engine
 
 Clone our TensorFold fork at the commit in `ENGINE_COMMIT` (branch `deepseek-v41-zig-tp4`). That commit is the
-served engine's source (`39155041`, the one commit v0.3.3 adds to the branch's public line, whose window,
-NOTICE, ATTRIBUTION.md and README note are v0.3.2's) carried on it as `b116c47` (section 3). The public
+served engine's source (`ebf6ae33`: v0.3.3's `39155041` and the one waves commit v0.3.5 adds) carried on
+the branch's public line as `0a0b69a` (v0.3.3's `b116c47` and that commit; section 3). The public
 line adds two pull requests the served build did not carry: #30, the neighbor transport, which runs only with
-`TF_DS_NEIGHBOR_RDMA=1`, and #31, a CPU test of the replay cut. `39155041`, built as below, gives the
+`TF_DS_NEIGHBOR_RDMA=1`, and #31, a CPU test of the replay cut. `ebf6ae33`, built as below, gives the
 served binaries but for nvcc's build ids. `ENGINE_COMMIT`'s binaries also hold #30's code, and their ranks exchange a
 48-byte settings frame at the start (40 before), so run the same build on all four nodes. Build the native engine for
 the GB10's aarch64 + sm_121 with Zig 0.17.0 and the CUDA toolchain of `nvcr.io/nvidia/pytorch:26.07-py3`:
@@ -58,8 +58,8 @@ as a fatbin for sm_121; without `TF_DS_RDMA_KERNELS` the engine uses its embedde
   needs the `tokenizers` package (without it on the host, it runs in `IMAGE` with docker). `CACHE_DIR/rank-cache` must
   not hold another file of the same rank. On our nodes the four took 146 s together. Each file's name holds the hash
   of its index; `results/served-1017/inputs.txt` lists the four names our served lane loads and the token map's sha256
-  (the 1017 tokenizer is V4.1-Flash's, so the map is v0.1.1's). v0.3.0, v0.3.1, v0.3.2 and
-v0.3.3 load the same four files.
+  (the 1017 tokenizer is V4.1-Flash's, so the map is v0.1.1's). v0.3.0, v0.3.1, v0.3.2,
+v0.3.3 and v0.3.5 load the same four files.
 - `KIT_DIR`, the kernel kit: this repository's `kit/` (see `kit/README.md`): `aot/` (the family's Triton kernels,
   compiled and captured by the recorder in the engine's `tools/dsv41-zig/rec/`), `cubins/` (its extension kernels),
   `engram.json`, the RoPE tables and their digests (`rope.json`), for images `vision/`, and `grammar/`
@@ -118,7 +118,7 @@ them.
 
 `config.env.example` holds the served settings: `ENGINE_ENV` (every rank's environment), `FOLLOW_FLAGS` (ranks 1-3) and
 `RANK0_FLAGS` (rank 0's own flags after the site's `SERVER_FLAGS`). `TF_FILL_CHUNKS=1`, `TF_FILL_MANY=1`,
-`TF_DS_2D_YX=1` and `NCCL_NCHANNELS_PER_NET_PEER=8` are set as served; leave `TENSORFOLD_REPLY_IDS`,
+`TF_DS_2D_YX=1`, `TF_DS_WAVES=1` and `NCCL_MAX_NCHANNELS=4` are set as served; leave `TENSORFOLD_REPLY_IDS`,
 `TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES` unset to serve as we do; the README says what
 each does when set.
 

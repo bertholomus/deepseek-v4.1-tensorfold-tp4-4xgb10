@@ -1,0 +1,20 @@
+a1 launch: NCCL_NCHANNELS_PER_NET_PEER=8 TF_DS_2D_YX=1 zig 3915504121d0 
+a1 8k rc=0 
+a1 32k rc=0 
+a1 128k rc=0 
+a1 decode median 120.6 tok/s tokens [512, 512, 512] sha ['610cba14f553', '610cba14f553', '610cba14f553']
+b1 launch: NCCL_MAX_NCHANNELS=4 TF_DS_2D_YX=1 TF_DS_WAVES=1 zig ebf6ae332bcc 
+b1 8k rc=0 
+b1 32k rc=0 
+b1 128k rc=0 
+b1 decode median 121.4 tok/s tokens [512, 512, 512] sha ['610cba14f553', '610cba14f553', '610cba14f553']
+a2 launch: NCCL_NCHANNELS_PER_NET_PEER=8 TF_DS_2D_YX=1 zig 3915504121d0 
+a2 8k rc=0 
+a2 32k rc=0 
+a2 128k rc=0 
+a2 decode median 120.6 tok/s tokens [512, 512, 512] sha ['610cba14f553', '610cba14f553', '610cba14f553']
+b2 launch: NCCL_MAX_NCHANNELS=4 TF_DS_2D_YX=1 TF_DS_WAVES=1 zig ebf6ae332bcc 
+b2 8k rc=0 
+b2 32k rc=0 
+b2 128k rc=0 
+b2 decode median 120.5 tok/s tokens [512, 512, 512] sha ['610cba14f553', '610cba14f553', '610cba14f553']

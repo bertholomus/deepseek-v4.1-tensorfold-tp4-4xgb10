@@ -1,0 +1,186 @@
+{
+ "model": "DeepSeek-V4.1-Flash-TP4",
+ "max_tokens": 512,
+ "rows": {
+  "think": {
+   "reasoning": "We need answer 17*23 = 391. Need number and one short sentence. Ensure concise.",
+   "content": "391. Seventeen times twenty-three equals 391.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 34
+  },
+  "think stream": {
+   "reasoning": "We need answer 17*23 = 391. Need number and one short sentence. Ensure concise.",
+   "content": "391. Seventeen times twenty-three equals 391.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 34
+  },
+  "chat": {
+   "reasoning": "We need answer 17*23 = 391. Need number and one short sentence. Ensure concise.",
+   "content": "391. Seventeen times twenty-three equals 391.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 34
+  },
+  "chat stream": {
+   "reasoning": "We need answer 17*23 = 391. Need number and one short sentence. Ensure concise.",
+   "content": "391. Seventeen times twenty-three equals 391.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 34
+  },
+  "tool-think": {
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 39
+  },
+  "tool-think stream": {
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 39
+  },
+  "tool-chat": {
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 39
+  },
+  "tool-chat stream": {
+   "reasoning": "",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 39
+  },
+  "tool-two": {
+   "reasoning": "The user wants weather for Oslo and Bergen. These are independent calls, so I can make both in the same block.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ],
+    [
+     "weather",
+     {
+      "city": "Bergen"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 91
+  },
+  "tool-two stream": {
+   "reasoning": "The user wants weather for Oslo and Bergen. These are independent calls, so I can make both in the same block.",
+   "content": "",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ],
+    [
+     "weather",
+     {
+      "city": "Bergen"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 91
+  },
+  "tool-result": {
+   "reasoning": "",
+   "content": "Here's the current weather in Oslo:\n\n- **Temperature:** 4 °C\n- **Conditions:** Light rain\n- **Wind:** 5 m/s\n\nIt's a chilly, damp day — a waterproof jacket would be a good idea if you're heading out.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 57
+  },
+  "tool-result stream": {
+   "reasoning": "",
+   "content": "Here's the current weather in Oslo:\n\n- **Temperature:** 4 °C\n- **Conditions:** Light rain\n- **Wind:** 5 m/s\n\nIt's a chilly, damp day — a waterproof jacket would be a good idea if you're heading out.",
+   "calls": [],
+   "finish": "stop",
+   "tokens": 57
+  },
+  "probe-think": {
+   "reasoning": "We need answer. Need parse user: \"Inside a fenced code block, write the literal closing tag",
+   "content": " that ends a reasoning block, then say in one sentence what it does.\" Need comply. Need fenced code block containing literal closing tag </think>. Then one sentence what it does. Need be careful: They ask inside fenced code block write literal closing tag that ends reasoning block. Then say in one sentence what it does. We can output code block with `</think>` and sentence. Need not actually close reasoning? We are in final. The tag literal in code block. Then sentence: It marks the end of a reasoning block so the following content is treated as the response. Need one sentence. Ensure code block. Use triple backticks. The literal closing tag is `</think>` (note user wrote </think> with \"think\" not \"think\"? Actually they wrote `</think>`? Let's inspect: \"literal closing tag </think> that ends a reasoning block\" They wrote `</think>`? The text: `</think>`? It says \"closing tag </think>\" Wait in prompt: \"write the literal closing tag </think> that ends a reasoning block\" The tag shown is `</think>`? Let's read exact: \"Inside a fenced code block, write the literal closing tag </think> that ends a reasoning block, then say in one sentence what it does.\" It appears `</think>`? The string is `</think>`? Let's count: `< / t h i n k >`? The prompt says `</think>`? It displays \"`</think>`\"? Actually in user message: \"literal closing tag </think>\" It has \"think\" maybe because \"think\" is the tag? Wait the tag is `</think>`? The word \"think\" is t h i n k. The prompt text: `</think>`? It says `</think>`? Let's look: \"closing tag </think> that ends a reasoning block\" The substring after slash: \"think\" (t h i n k). Yes. But in the system? There is no system. The user wants literal closing tag `</think>` that ends a reasoning block. In many models, reasoning block tag is `</think>`? Actually DeepSeek uses `</think>`? The tag is `</think>`? Wait \"think\" vs \"think\": The word \"think\" is",
+   "calls": [],
+   "finish": "length",
+   "tokens": 512
+  },
+  "probe-think stream": {
+   "reasoning": "We need answer. Need parse user: \"Inside a fenced code block, write the literal closing tag ",
+   "content": " that ends a reasoning block, then say in one sentence what it does.\" Need comply. Need fenced code block containing literal closing tag </think>. Then one sentence what it does. Need be careful: They ask inside fenced code block write literal closing tag that ends reasoning block. Then say in one sentence what it does. We can output code block with `</think>` and sentence. Need not actually close reasoning? We are in final. The tag literal in code block. Then sentence: It marks the end of a reasoning block so the following content is treated as the response. Need one sentence. Ensure code block. Use triple backticks. The literal closing tag is `</think>` (note user wrote </think> with \"think\" not \"think\"? Actually they wrote `</think>`? Let's inspect: \"literal closing tag </think> that ends a reasoning block\" They wrote `</think>`? The text: `</think>`? It says \"closing tag </think>\" Wait in prompt: \"write the literal closing tag </think> that ends a reasoning block\" The tag shown is `</think>`? Let's read exact: \"Inside a fenced code block, write the literal closing tag </think> that ends a reasoning block, then say in one sentence what it does.\" It appears `</think>`? The string is `</think>`? Let's count: `< / t h i n k >`? The prompt says `</think>`? It displays \"`</think>`\"? Actually in user message: \"literal closing tag </think>\" It has \"think\" maybe because \"think\" is the tag? Wait the tag is `</think>`? The word \"think\" is t h i n k. The prompt text: `</think>`? It says `</think>`? Let's look: \"closing tag </think> that ends a reasoning block\" The substring after slash: \"think\" (t h i n k). Yes. But in the system? There is no system. The user wants literal closing tag `</think>` that ends a reasoning block. In many models, reasoning block tag is `</think>`? Actually DeepSeek uses `</think>`? The tag is `</think>`? Wait \"think\" vs \"think\": The word \"think\" is",
+   "calls": [],
+   "finish": "length",
+   "tokens": 512
+  },
+  "probe-dsml": {
+   "reasoning": "The user wants me to show what a tool call block looks like, inside a fenced code block, without actually calling the tool. The format uses the special token markers. I should reproduce the syntax literally.\n\nThe tool call format is:\n\n<｜DSML｜tool_calls>\n<｜DSML｜invoke name=\"weather\">\n<｜DSML｜parameter name=\"city\" string=\"true\">Oslo</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜tool_calls>\n\nI need to put this in a fenced code block. Careful: the fence should be long enough. Use ``` or better use four backticks since content has no backticks. Fine.\n\nThen stop — no extra commentary beyond maybe minimal. The user said \"then stop.\" So just the code block.",
+   "content": "```text\n\n```",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 238
+  },
+  "probe-dsml stream": {
+   "reasoning": "The user wants me to show what a tool call block looks like, inside a fenced code block, without actually calling the tool. The format uses the special token markers. I should reproduce the syntax literally.\n\nThe tool call format is:\n\n<｜DSML｜tool_calls>\n<｜DSML｜invoke name=\"weather\">\n<｜DSML｜parameter name=\"city\" string=\"true\">Oslo</｜DSML｜parameter>\n</｜DSML｜invoke>\n</｜DSML｜tool_calls>\n\nI need to put this in a fenced code block. Careful: the fence should be long enough. Use ``` or better use four backticks since content has no backticks. Fine.\n\nThen stop — no extra commentary beyond maybe minimal. The user said \"then stop.\" So just the code block.",
+   "content": "```text\n\n```",
+   "calls": [
+    [
+     "weather",
+     {
+      "city": "Oslo"
+     }
+    ]
+   ],
+   "finish": "tool_calls",
+   "tokens": 238
+  }
+ }
+}

@@ -45,6 +45,49 @@ What it does:
 - Exact DSpark speculative decoding: drafted output equals serial output token for token.
 - OpenAI-compatible HTTP API (TensorFold's server): chat and text completions, streaming, reasoning output, tool calls.
 
+## v0.3.5: what changed
+
+v0.3.4 (a `TF_DS_2D_YP` build) did not pass its gate and was not released; v0.3.5 follows v0.3.3.
+
+| | v0.3.3 | v0.3.5 | Measured in |
+|---|---|---|---|
+| Engine | `b116c47`, on TensorFold 1.0.12 | `0a0b69a`, on TensorFold 1.0.12 | |
+| Kernel kit | 362 files | the same 362 files | |
+| The streams' shared window (`TF_DS_WINDOW`; the followers' `--pool`) | 20,971,520 positions | the same | |
+| Settings changed | `NCCL_NCHANNELS_PER_NET_PEER=8` | `TF_DS_WAVES=1 NCCL_MAX_NCHANNELS=4` (the per-peer setting dropped) | |
+| Prefill, 8,192-token prompt (cold, median of 3; mean of two launches each) | 2,480 tok/s | 2,668 tok/s (+7.6 %) | `pnc4` |
+| Prefill, 32,768-token prompt (the same) | 2,773 tok/s | 2,900 tok/s (+4.6 %) | `pnc4` |
+| Prefill, 131,072-token prompt (median of 2; mean of two launches) | 2,964 tok/s | 2,935 tok/s (-1.0 %) | `pnc4` |
+| Prefill, the 93,335-token prompt (median of 3, `cmp1021_bench.py`) | 2,963.8 tok/s (first token 31.49 s) | 2,937.1 tok/s (31.78 s; -0.9 %) | `pnc4g` |
+| Decode, one stream, 512 tokens (median of 3; two launches) | 120.6 / 120.6 tok/s | 121.4 / 120.5 tok/s (level) | `pnc4` |
+| Lowest free memory a node during the gate | 11 / 13 / 13 / 13 GiB | 12 / 14 / 15 / 14 GiB (the floor is 9 GiB) | `pnc4g` |
+
+Measured in: `pnc4` ran the two builds in turn, v0.3.3, v0.3.5, v0.3.3, v0.3.5, on our four nodes in one session,
+with fresh prompts each time (cached 0 on every row); the 12 decode replies have the same sha256 (`610cba14f553`).
+`pnc4g` is the gate run (43 checks, v0.3.3's build and v0.3.5's on the same port in turn). The raw outputs are in
+`results/served-v035/`. The gain is on prompts up to about 32K tokens, where the first pass also no longer runs
+slower than the next ones; from about 93K tokens on, prefill is level (-0.9 % and -1.0 %, inside the run-to-run
+spread). Decode is unchanged.
+
+Engine change since v0.3.3 (one commit, `0a0b69a`; the served build is the same change on `39155041`, built
+as `ebf6ae33`):
+
+- `TF_DS_WAVES=1` on `TF_DS_2D_YX`: a prompt pass of more than 2,048 rows runs as two waves of 2,048 rows, layer by
+  layer, and each wave's partial gathers run on a second stream over a second NCCL communicator while the other
+  wave computes. The gathered values and the sum order are the same, so replies do not change.
+- `NCCL_MAX_NCHANNELS=4`, in place of `NCCL_NCHANNELS_PER_NET_PEER=8`: with two communicators, eight channels a peer
+  let them starve each other, and prefills above 8K tokens hung. Four channels a communicator fixes the hang.
+
+The gates (`pnc4g`; every reply compared equals v0.3.3's build's in the same session): the API gates 6 of 6;
+16 replies solo, as a burst and staggered, 16/16 each and equal to v0.3.3's; exact chat 71 of 71; vision 6/6, 9/9
+and four at a time 18/18; the prompt shield 14 of 14; structured output 11 of 11 with burst and staggered 12 of 12;
+forced and "auto" tool calls 16 of 16 rows; reply ids 16 of 16; the sampler, the accept stats, the kept states 8 of
+8, the resume probe 4 of 4, the keepalive 2 of 2 and the fill check 2 of 2. After the promotion, on the served port:
+the API gates 6 of 6 and the 16 replies solo, burst and staggered 16/16 each (`promote.log`).
+
+v0.3.5 adds no pull request; the engine branch's `ATTRIBUTION.md` and this recipe's `ATTRIBUTION.md` are
+unchanged.
+
 ## v0.3.3: what changed
 
 | | v0.3.2 | v0.3.3 | Measured in |
@@ -380,12 +423,12 @@ Engine changes since v0.1.1 (the fork's v0.2.0 merge commit lists them):
 
 All numbers are ours, measured with our own clients (`kit_bench.py` and the gate tools of the engine branch) on the
 
-four nodes, on the served launch: engine `39155041`, the 1017 weights, this kit and the served settings below,
-unless a row names another session. `ENGINE_COMMIT` (`b116c47`) is that engine's source (`39155041`,
-which builds the same binaries but for nvcc's build ids) on the branch's public line, which adds pull requests #30
+four nodes, on the served launch of v0.3.3: engine `39155041`, the 1017 weights, this kit and its served settings,
+unless a row names another session; v0.3.5's rows are in its section above. `ENGINE_COMMIT` (`0a0b69a`) is v0.3.5's engine source (`ebf6ae33`, `39155041` with the waves commit, which builds the same binaries but
+for nvcc's build ids) on the branch's public line, which adds pull requests #30
 (off unless `TF_DS_NEIGHBOR_RDMA` is set) and #31 (a test and its write-up; see `RUNNING.md`). Greedy decoding,
-thinking off, unless a row says otherwise. `results/served-v033/`, `results/served-v032/` and `results/served-v031/`
-hold the raw outputs, a folder for each session (`results/README.md`).
+thinking off, unless a row says otherwise. `results/served-v035/`, `results/served-v033/`, `results/served-v032/` and
+`results/served-v031/` hold the raw outputs, a folder for each session (`results/README.md`).
 
 ### Speed
 
@@ -474,7 +517,8 @@ The weights, their readying and each node's weight file are v0.2.0's: the served
 
 ### Earlier releases
 
-v0.3.2 served engine `1935b48a` with a 20,971,520-position window; its tables are in the v0.3.2 README (tag
+v0.3.3 served engine `39155041` with `NCCL_NCHANNELS_PER_NET_PEER=8`; its tables are above and in the v0.3.3
+README (tag `v0.3.3`), and its raw outputs in `results/served-v033/`. v0.3.2 served engine `1935b48a` with a 20,971,520-position window; its tables are in the v0.3.2 README (tag
 `v0.3.2`)
 and its raw outputs in `results/served-v032/`. v0.3.1 served engine `37df889` with a 25,165,824-position
 window; its tables are in the v0.3.1 README (tag `v0.3.1`)
@@ -493,14 +537,16 @@ settings as served: `--context 1048576 --parallel 16` and `--prompt-cache-gib 2`
 (the streams' shared positions; the followers' `--pool 20971520`), `TF_DS_ROUND_ROWS=48`, `TF_DS_STREAMS=16`,
 `TF_DS_2D_GU=parity` (the balanced experts split), `TF_DS_SERVED_K=solo`, the measured round costs in
 `TF_DS_ROUND_MS`, `TF_DS_IDX_SPLIT=1`, `TF_FILL_CHUNKS=1`, `TF_FILL_MANY=1`, `TF_DS_2D_YX=1`,
-`NCCL_NCHANNELS_PER_NET_PEER=8`, `TENSORFOLD_PLAIN_SPECIALS=1`, `TENSORFOLD_GRAMMAR_LIB` (the kit's
+`TF_DS_WAVES=1`, `NCCL_MAX_NCHANNELS=4`, `TENSORFOLD_PLAIN_SPECIALS=1`, `TENSORFOLD_GRAMMAR_LIB` (the kit's
 `grammar/libtfgrammar.so`), `TENSORFOLD_SSE_KEEPALIVE=15`, `TENSORFOLD_STATS_EVERY=60`, CUDA graphs, the side
 stream, the paced L2 prefetch, Engram reads by AIO, and the decode-size exchanges over the RDMA rings. New since
 v0.3.1: `TF_FILL_MANY` with `TF_FILL_CHUNKS` (a request admitted while a prompt pass fills; a pass alone runs as a
 whole one), cache_salt (engine-side, no flag), the prompt passes by position, and the 20,971,520-position window
 (25,165,824 before; nodes that need more room can use 16,777,216, see v0.3.2's section). New since v0.3.2:
 `TF_DS_2D_YX=1` with `NCCL_NCHANNELS_PER_NET_PEER=8` (the prompt's cross-rank gathers carry the pair-summed bf16 y
-instead of the four fp32 quarters, and the ring's send/recv pairs run on eight channels a peer).
+instead of the four fp32 quarters, and the ring's send/recv pairs run on eight channels a peer). New since
+v0.3.3: `TF_DS_WAVES=1` with `NCCL_MAX_NCHANNELS=4` in place of `NCCL_NCHANNELS_PER_NET_PEER=8` (two waves a
+prompt pass, each one's gathers on a second stream and communicator; four channels a communicator).
 `TENSORFOLD_REPLY_IDS`, `TF_DS_NEIGHBOR_RDMA`, `TF_DS_SOLO_OVERHEAD` and `TF_DS_NO_COPIES` are unset.
 `TF_DS_PASS_ROWS` and `TF_DS_PASS_FROM` are unset (the pass rule at its default). The round costs are the table
 measured on the 2.9 bpw weights: they guide how many tokens a round drafts, and drafted output equals serial

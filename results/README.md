@@ -4,6 +4,22 @@ Our own measurements of our own engine on four GB10 nodes, as the README's table
 addresses and paths are not in these files; nothing else was changed, except where a section says a file holds only
 a part of a check's output.
 
+## `served-v035/`: v0.3.5, the A/B and gate slots' files on the four nodes (2026-10-23)
+
+Two slots, each on a side port with the served lane stopped, then the promotion. A = v0.3.3's served build (engine
+`39155041`, `NCCL_NCHANNELS_PER_NET_PEER=8`), B = v0.3.5's (engine `ebf6ae33`, `TF_DS_WAVES=1 NCCL_MAX_NCHANNELS=4`).
+Private host names and paths are out; nothing else changed.
+
+| File | What |
+|---|---|
+| `pnc4/{a1,b1,a2,b2}-{8k,32k,128k}.json` | `cmp1021_bench.py prefill`, cold (fresh prompts, cached 0): 8K and 32K three reps, 128K two; the launches ran in the order a1, b1, a2, b2 |
+| `pnc4/{a1,b1,a2,b2}-dec.json` | 512-token greedy decode, three reps a launch, with each reply's sha256 |
+| `pnc4/summary.txt` | the A/B run's log |
+| `pnc4g/result.txt` | the gate's 43 verdicts, A then B, and the 93,335-token prefill line |
+| `pnc4g/prefill-93335-{a,b}.json` | the 93,335-token prefill, three reps each |
+| `pnc4g/*.json`, `pnc4g/done-b.txt` | B's gate files: gates, parallel (A's and B's), exact chat, vision, structured, DSML, sampler, reply ids, accept stats, shield, keepalive, kept states, resume, fill; B's request log |
+| `promote.log` | the promotion: the build to the four nodes, the served port's gates and the 16 replies |
+
 ## `served-v033/`: v0.3.3, the gate slot's files on the four nodes (2026-10-22)
 
 The README's v0.3.3 rows come from slot `zyx` (chain-zyx). Each launch is a phase: a = the build served before

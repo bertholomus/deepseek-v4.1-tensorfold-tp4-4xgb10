@@ -1,0 +1,78 @@
+{
+ "summary": {
+  "mode": "prefill",
+  "reps": 2,
+  "url": "http://127.0.0.1:18095",
+  "body": "FOLDER",
+  "median_prefill_tok_s": 2956.728832744323,
+  "median_ttft_s": 42.85308509800234
+ },
+ "rows": [
+  {
+   "ttft_s": 43.146800704009365,
+   "total_s": 43.14687468903139,
+   "usage": {
+    "prompt_tokens": 126699,
+    "completion_tokens": 1,
+    "total_tokens": 126700,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 0.0,
+    "seconds": 0.000401108,
+    "prefill_seconds": 43.025792488,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 43.14488523,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "44cb730c4204",
+    "token_sha256": "44cb730c420480a0477b505ae68af508fb90f96cf0ec54c6ad16949dd427f13a",
+    "min_rows": 0
+   },
+   "text": "I",
+   "prefill_tok_s": 2936.46337463502
+  },
+  {
+   "ttft_s": 42.55936949199531,
+   "total_s": 42.55948219698621,
+   "usage": {
+    "prompt_tokens": 126699,
+    "completion_tokens": 1,
+    "total_tokens": 126700,
+    "prompt_tokens_details": {
+     "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "tensorfold": {
+    "enable_thinking": false,
+    "reasoning_effort": "none",
+    "engine": "lanes",
+    "tokens_per_second": 0.0,
+    "seconds": 0.000406724,
+    "prefill_seconds": 42.451558029,
+    "prefill_widths": [],
+    "prefill_raised": [],
+    "time_to_first_token": 42.557603524,
+    "sampling": "greedy",
+    "drafts": true,
+    "token_sha": "44cb730c4204",
+    "token_sha256": "44cb730c420480a0477b505ae68af508fb90f96cf0ec54c6ad16949dd427f13a",
+    "min_rows": 0
+   },
+   "text": "I",
+   "prefill_tok_s": 2976.9942908536254
+  }
+ ]
+}
