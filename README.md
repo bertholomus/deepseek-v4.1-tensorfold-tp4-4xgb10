@@ -17,6 +17,8 @@ tags:
 
 # DeepSeek-V4.1-Flash-1017 on four DGX Spark (GB10) nodes: a TensorFold TP4 engine
 
+> **Maintenance mode.** This recipe is stable at v0.3.7. We still answer issues and review bug-fix pull requests, but we are not adding new features. Our active work is on [GLM-5.3 on four DGX Sparks](https://github.com/bertholomus/glm-5.3-exlr8-4x-spark).
+
 Weights: [bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw](https://huggingface.co/bertholomus/DeepSeek-V4.1-Flash-1017-EXL3-4.0bpw)
 (MIT), our EXL3 quant of [deepseek-ai/DeepSeek-V4.1-Flash-1017](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)
 (MIT). This repository is a recipe: the served launch, our measurements, the gates the build passed, the chat
